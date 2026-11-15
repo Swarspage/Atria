@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight, Check, Copy, Download, Plus, RotateCounterClockwise } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowUpRight, Check, Copy, Download, Plus, ArrowCounterClockwise as RotateCounterClockwise } from '@phosphor-icons/react';
 
 const buttonStyle = { display:'inline-flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid var(--line)', background:'#fff', color:'var(--ink)', fontSize:11, cursor:'pointer' };
 const palettes = [
