@@ -1,4 +1,10 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import DashboardLayout from './layouts/DashboardLayout.jsx'
+import Overview from './pages/Overview.jsx'
+import Foundations from './pages/Foundations.jsx'
+import Tokens from './pages/Tokens.jsx'
+import Components from './pages/Components.jsx'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -30,7 +36,7 @@ const foundations = [
 
 const swatches = ['#171717', '#55534F', '#99958D', '#D5D1C8', '#EEECE7']
 
-function App() {
+function LandingPage() {
   const [activeTab, setActiveTab] = useState('Button')
   const [copied, setCopied] = useState(false)
 
@@ -71,7 +77,7 @@ function App() {
             A thoughtful space to create, organise, and document design systems — bringing design decisions and development closer together.
           </p>
           <div className="hero-actions">
-            <a className="button button-dark" href="#studio">Explore the studio <ArrowRight size={16} /></a>
+            <a className="button button-dark" href="/explore">Explore the studio <ArrowRight size={16} /></a>
             <a className="text-link" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">Explore the repository <ArrowUpRight size={15} /></a>
           </div>
           <div className="hero-footnote"><span className="mono">01 / 04</span><span>DESIGNED FOR TEAMS THAT CARE ABOUT THE DETAILS</span></div>
@@ -187,6 +193,25 @@ function App() {
         <div className="footer-bottom"><span>© 2026 ATRIA STUDIO</span><span>OPEN SOURCE · EARLY DEVELOPMENT</span><a href="/docs">DOCUMENTATION</a><a href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">GITHUB <ArrowUpRight size={12} /></a></div>
       </footer>
     </main>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/explore" element={<DashboardLayout />}>
+          <Route index element={<Overview />} />
+          <Route path="foundations" element={<Foundations />} />
+          <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
+          <Route path="tokens" element={<Tokens />} />
+          <Route path="components" element={<Components />} />
+        </Route>
+        <Route path="/studio/*" element={<Navigate to="/explore" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
