@@ -25,7 +25,7 @@ export default function Components(){
   <section style={{marginTop:22}}>
    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,flexWrap:'wrap',marginBottom:12}}>
     <div><span className="studio-kicker">BROWSE THE LIBRARY</span><p style={{fontSize:11,color:'#777',margin:'5px 0 0'}}>Select several components to copy their CSS together, or open one to inspect its implementation.</p></div>
-    <button onClick={()=>navigator.clipboard.writeText(library.filter(x=>selected.includes(x.id)).map(x=>'/* '+x.name+' */\\n'+x.css).join('\\n\\n'))} disabled={!selected.length} style={{...btn,background:selected.length?'#242420':'#f3f2ef',color:selected.length?'#fff':'#999',borderColor:selected.length?'#242420':'var(--line)',opacity:selected.length?1:.65}}> <Copy size={13}/> Copy CSS ({selected.length})</button>
+    <button onClick={()=>navigator.clipboard.writeText(library.filter(x=>selected.includes(x.id)).map(x=>'/* '+x.name+' */\n'+x.css).join('\n\n'))} disabled={!selected.length} style={{...btn,background:selected.length?'#242420':'#f3f2ef',color:selected.length?'#fff':'#999',borderColor:selected.length?'#242420':'var(--line)',opacity:selected.length?1:.65}}> <Copy size={13}/> Copy CSS ({selected.length})</button>
    </div>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>
     {library.map((c,i)=><article key={c.id} style={{minWidth:0,border:'1px solid '+(selected.includes(c.id)?'#242420':'var(--line)'),background:'#fff',padding:13}}>
