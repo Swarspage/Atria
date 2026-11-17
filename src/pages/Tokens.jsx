@@ -5,7 +5,7 @@ const control={minWidth:0,padding:'9px 10px',border:'1px solid var(--line)',back
 const action={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid var(--ink)',background:'#242420',color:'#fff',fontSize:10,cursor:'pointer'};
 function CopyValue({value}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
 export default function Tokens(){
- const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);
+ const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);
  const [draft,setDraft]=useState({name:'',value:'',type:'color',description:'',group:'Primitive'});
  const visible=useMemo(()=>tokens.filter(t=>(group==='All'||t.group===group)&&[t.name,t.value,t.description].join(' ').toLowerCase().includes(query.toLowerCase())),[tokens,group,query]);
  const css=':root {\n'+tokens.map(t=>'  --atria-'+t.name.replaceAll('.','-')+': '+t.value+';').join('\n')+'\n}';
@@ -32,9 +32,18 @@ export default function Tokens(){
      <button title="Delete token" onClick={()=>{save(items=>items.filter(x=>x.id!==t.id));setSelected(old=>old.filter(id=>id!==t.id))}} style={{border:0,background:'transparent',cursor:'pointer'}}><Trash size={14}/></button>
     </div>
     <p style={{fontSize:10,color:'#888',lineHeight:1.5,minHeight:28,margin:'9px 0 0'}}>{t.description||'No description added.'}</p>
+    <button onClick={()=>setActiveToken(t)} style={{...control,width:'100%',marginTop:10,cursor:'pointer'}}>Open token <span style={{float:'right'}}>↗</span></button>
    </article>)}
    {!visible.length&&<p style={{padding:16,color:'#888',fontSize:11}}>No matching tokens.</p>}
   </div>
+  {activeToken&&<div role="presentation" onClick={()=>setActiveToken(null)} style={{position:'fixed',inset:0,zIndex:1100,background:'#17171780',display:'grid',placeItems:'center',padding:18}}>
+   <section role="dialog" aria-modal="true" aria-labelledby="token-detail-title" onClick={e=>e.stopPropagation()} style={{width:'min(100%,520px)',maxHeight:'85vh',overflow:'auto',background:'#fff',border:'1px solid var(--line)',padding:20}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><div><span className="studio-kicker">{activeToken.group} / {activeToken.type}</span><h3 id="token-detail-title" style={{fontSize:20,margin:'7px 0'}}>{activeToken.name}</h3></div><button onClick={()=>setActiveToken(null)} aria-label="Close token details" style={control}>Close</button></div>
+    <p style={{fontSize:12,color:'#777'}}>{activeToken.description||'No description added.'}</p>
+    <pre style={{whiteSpace:'pre-wrap',padding:14,background:'#242420',color:'#e9e7e1',fontSize:11,lineHeight:1.7}}>--atria-{activeToken.name.replaceAll('.','-')}: {activeToken.value};</pre>
+    <button style={action} onClick={()=>navigator.clipboard.writeText('--atria-'+activeToken.name.replaceAll('.','-')+': '+activeToken.value+';')}><Copy size={13}/> Copy CSS</button>
+   </section>
+  </div>}
   <section style={{marginTop:20,padding:16,border:'1px solid var(--line)',background:'#fafaf8'}}><div className="placeholder-panel-heading"><div><span className="studio-kicker">ADD TO COLLECTION</span><h3>New token</h3></div></div><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(135px,1fr))',gap:8}}><input aria-label="Token name" placeholder="color.brand.primary" value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})} style={control}/><input aria-label="Token value" placeholder="#171717 or 16px" value={draft.value} onChange={e=>setDraft({...draft,value:e.target.value})} style={control}/><select aria-label="Token type" value={draft.type} onChange={e=>setDraft({...draft,type:e.target.value})} style={control}><option value="color">Colour</option><option value="dimension">Dimension</option><option value="font">Font</option><option value="number">Number</option><option value="string">String</option></select><select aria-label="Token group" value={draft.group} onChange={e=>setDraft({...draft,group:e.target.value})} style={control}><option>Primitive</option><option>Semantic</option></select></div><div style={{display:'flex',gap:8,marginTop:8}}><input aria-label="Description" placeholder="Short usage note (optional)" value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})} style={{...control,flex:1}}/><button style={action} onClick={add}><Plus size={13}/> Add</button></div></section>
   <section style={{marginTop:22}}><div className="placeholder-panel-heading"><div><span className="studio-kicker">LIVE EXPORT PREVIEW</span><h3>CSS custom properties</h3></div><CopyValue value={css}/></div><pre style={{whiteSpace:'pre',overflowX:'auto',padding:15,background:'#242420',color:'#e9e7e1',fontSize:10,lineHeight:1.8}}>{css}</pre></section>
   <div style={{display:'flex',justifyContent:'flex-end',marginTop:14}}><button style={control} onClick={()=>{if(window.confirm('Restore the starter token collection?'))reset()}}>Reset starter tokens</button></div>
