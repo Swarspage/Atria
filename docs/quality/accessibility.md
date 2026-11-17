@@ -163,6 +163,7 @@ These are proposals, not implemented work.
 
 ## 6. Related documents
 
+- [Component library](../features/component-library.md)
 - [Testing strategy](testing-strategy.md)
 - [Styling and design tokens](../engineering/styling-and-design-tokens.md)
 - [Landing page](../features/landing-page.md)

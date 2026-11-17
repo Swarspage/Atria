@@ -60,6 +60,6 @@ The component library currently includes Button, Text Field, Status Badge, Conte
 | [Explore Studio](explore-studio.md) | Workspace shell, routes, and navigation |
 | [Design foundations](design-foundations.md) | Presets, editor behaviour, local persistence, and exports |
 | [Design tokens](design-tokens.md) | Token editing, search, grouping, and export behaviour |
-| [Component library](component-library.md) | Current component set, previews, snippets, and limitations |
+| [Component library](component-library.md) | Catalogue of ten component examples, usage guidance, and accessibility notes |
 | [Documentation hub](documentation-hub.md) | `/docs` content and outbound links |
 | [API reference](api-reference.md) | Current API boundary and health endpoint |

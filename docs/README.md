@@ -107,7 +107,7 @@ The architecture set explains what exists, how it is composed, and why it is bui
 | [Explore Studio](features/explore-studio.md) | Implemented | Workspace shell, resource routes, and navigation |
 | [Design foundations](features/design-foundations.md) | Implemented, local | Resource catalogue, editable presets, and exports |
 | [Design tokens](features/design-tokens.md) | Implemented, local | Token editing, search, filters, and exports |
-| [Component library](features/component-library.md) | Placeholder | Implementation brief for the component registry |
+| [Component library](features/component-library.md) | Implemented, limited | Catalogue of ten component examples, usage guidance, and accessibility notes |
 | [Documentation hub](features/documentation-hub.md) | Implemented | `/docs` collections and outbound documents |
 | [API reference](features/api-reference.md) | Limited | Documents the Express health-check endpoint and planned API boundaries |
 
