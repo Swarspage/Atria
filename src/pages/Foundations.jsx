@@ -42,16 +42,22 @@ const categories = [
 ];
 function CopyButton({value,label='Copy'}) { const [copied,setCopied]=useState(false); return <button style={buttonStyle} onClick={async()=>{try{await navigator.clipboard.writeText(value);setCopied(true);window.setTimeout(()=>setCopied(false),1200)}catch{}}}>{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':label}</button>; }
 function downloadFile(name,content,type='text/css'){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
-function ResourceCard({resource,category,onClick}) {
- return <button onClick={onClick} style={{textAlign:'left',border:'1px solid var(--line)',background:'#fff',padding:14,cursor:'pointer',color:'var(--ink)',minWidth:0}}>
-  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}><span className="studio-kicker">{category.label.toUpperCase()}</span><ArrowUpRight size={15}/></div>
+function ResourceCard({resource,category,onClick,selected,onSelect}) {
+ return <article style={{textAlign:'left',border:'1px solid '+(selected?'#242420':'var(--line)'),background:'#fff',padding:14,minWidth:0}}>
+  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}><span className="studio-kicker">{category.label.toUpperCase()}</span><label style={{display:'flex',alignItems:'center',gap:5,fontSize:9,color:'#777'}}><input type="checkbox" checked={selected} onChange={onSelect} aria-label={'Select '+resource.name} style={{accentColor:'#242420'}}/> Select</label></div>
   {category.id==='colour' ? <div style={{display:'flex',gap:5,marginBottom:14}}>{resource.colors.map(([n,c])=><span key={n} title={n} style={{height:56,flex:1,minWidth:0,borderRadius:30,background:c,border:'1px solid rgba(0,0,0,.06)'}}/>)}</div> :
    category.id==='typography' ? <div style={{height:56,display:'flex',flexDirection:'column',justifyContent:'center',gap:3,marginBottom:14}}><strong style={{fontSize:24,lineHeight:1}}>Aa</strong><span style={{fontSize:10,color:'#888'}}>Aa Bb Cc 123</span></div> :
    category.id==='spacing' ? <div style={{height:56,display:'flex',alignItems:'end',gap:5,marginBottom:14}}>{resource.items.slice(0,6).map((v,i)=><span key={i} style={{width:18,height:Math.max(8,v),maxHeight:52,background:'#55534F'}}/>)}</div> :
    <div style={{height:56,display:'flex',alignItems:'center',gap:10,marginBottom:14}}>{resource.items.slice(1,4).map((v,i)=><span key={i} style={{width:38,height:38,background:'#eeede9',border:'1px solid #d8d6cf',borderRadius:v}}/>)}</div>}
   <strong style={{display:'block',fontSize:13,marginBottom:5}}>{resource.name}</strong><span style={{display:'block',fontSize:11,lineHeight:1.5,color:'#777',minHeight:34}}>{resource.description}</span>
   <div style={{display:'flex',gap:5,flexWrap:'wrap',marginTop:12}}>{resource.tags.map(tag=><span key={tag} style={{fontSize:9,padding:'4px 6px',background:'#f3f2ef',color:'#666'}}>{tag}</span>)}</div>
- </button>;
+  <button onClick={onClick} style={{...buttonStyle,width:'100%',justifyContent:'center',marginTop:13}}>Open foundation <ArrowUpRight size={13}/></button>
+ </article>;
+}
+function foundationResourceCss(category,resource){
+ if(category.id==='colour')return ':root {\\n'+resource.colors.map(([name,value])=>'  --color-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+': '+value+';').join('\\n')+'\\n}';
+ if(category.id==='typography')return ':root {\\n'+resource.items.map(([name,size,weight,lineHeight])=>'  --font-'+name.toLowerCase()+': '+size+'px;\\n  --font-weight-'+name.toLowerCase()+': '+weight+';\\n  --line-height-'+name.toLowerCase()+': '+lineHeight+';').join('\\n')+'\\n}';
+ return ':root {\\n'+resource.items.map((value,i)=>'  --'+(category.id==='spacing'?'space-'+(i+1):'radius-'+['none','small','medium','large','pill'][i])+': '+value+(category.id==='spacing'?'px':'px')+';').join('\\n')+'\\n}';
 }
 function FoundationsLibrary(){
  const navigate=useNavigate();
@@ -61,7 +67,7 @@ function FoundationsLibrary(){
   <p style={{fontSize:13,color:'#777',lineHeight:1.7,maxWidth:600,margin:'8px 0 28px'}}>Explore ready-to-use foundations for your next product. Open any resource to customise its values, copy them or export them for your project.</p>
   {categories.map(category=><section key={category.id} style={{marginBottom:30}}>
    <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:12,marginBottom:12}}><div><span className="studio-kicker">{category.resources.length} RESOURCES</span><h3 style={{fontSize:18,margin:'5px 0'}}>{category.label}</h3><p style={{fontSize:11,color:'#888',margin:0}}>{category.description}</p></div></div>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>{category.resources.map(resource=><ResourceCard key={resource.id} resource={resource} category={category} onClick={()=>navigate('/explore/foundations/'+category.id+'/'+resource.id)}/>)}</div>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>{category.resources.map(resource=><ResourceCard key={resource.id} resource={resource} category={category} selected={(selected[category.id]||[]).includes(resource.id)} onSelect={()=>setSelected(old=>({...old,[category.id]:(old[category.id]||[]).includes(resource.id)?old[category.id].filter(id=>id!==resource.id):[...(old[category.id]||[]),resource.id]}))} onClick={()=>navigate('/explore/foundations/'+category.id+'/'+resource.id)}/>)}</div><div style={{display:'flex',justifyContent:'flex-end',marginTop:10}}><button style={buttonStyle} disabled={!(selected[category.id]||[]).length} onClick={()=>navigator.clipboard.writeText(category.resources.filter(r=>(selected[category.id]||[]).includes(r.id)).map(r=>'/* '+r.name+' */\\n'+foundationResourceCss(category,r)).join('\\n\\n'))}><Copy size={13}/> Copy selected CSS ({(selected[category.id]||[]).length})</button></div>
   </section>)}
  </div>;
 }
