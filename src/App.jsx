@@ -78,8 +78,8 @@ function LandingPage() {
             A thoughtful space to create, organise, and document design systems — bringing design decisions and development closer together.
           </p>
           <div className="hero-actions">
-            <a className="button button-dark" href="/studio">Open the studio <ArrowRight size={16} /></a>
-            <a className="text-link" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">Explore the repository <ArrowUpRight size={15} /></a>
+            <a className="button button-dark" href="/explore">Explore library <ArrowRight size={16} /></a>
+            <a className="text-link" href="/studio">Open studio <ArrowUpRight size={15} /></a>
           </div>
           <div className="hero-footnote"><span className="mono">01 / 04</span><span>DESIGNED FOR TEAMS THAT CARE ABOUT THE DETAILS</span></div>
         </div>
