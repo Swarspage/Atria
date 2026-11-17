@@ -58,6 +58,7 @@ The component library currently includes Button, Text Field, Status Badge, Conte
 |---|---|
 | [Landing page](landing-page.md) | Public site sections and interactions |
 | [Explore Studio](explore-studio.md) | Workspace shell, routes, and navigation |
+| [Interactive Studio](studio-builder.md) | Mobile panel controls, canvas scrolling, Save, and Export |
 | [Design foundations](design-foundations.md) | Presets, editor behaviour, local persistence, and exports |
 | [Design tokens](design-tokens.md) | Token editing, search, grouping, and export behaviour |
 | [Component library](component-library.md) | Catalogue of ten component examples, usage guidance, and accessibility notes |
