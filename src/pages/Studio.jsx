@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Check, Code, Copy, Download, FloppyDisk, Layers, Palette, Plus, SquaresFour, Stack, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Code, Copy, Download, FloppyDisk, Palette, Plus, SquaresFour, Stack, Trash, X } from '@phosphor-icons/react';
 import './studio.css';
 
 const paletteSets = [
@@ -75,7 +75,7 @@ export default function Studio() {
  const copy=async()=>{try{await navigator.clipboard.writeText(output);setCopied(true);window.setTimeout(()=>setCopied(false),1200);}catch{}};
  const download=()=>{const ext=format==='Tokens'?'json':format==='React'?'jsx':format==='HTML'?'html':'css';const url=URL.createObjectURL(new Blob([output],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='atria-design-system.'+ext;a.click();URL.revokeObjectURL(url);};
  const onDrop=e=>{e.preventDefault();const type=e.dataTransfer.getData('atria-component');if(type)add(type);};
- const panels=[['Add',<Plus size={15}/>],['Layers',<Layers size={15}/>],['Tokens',<Stack size={15}/>],['Palettes',<Palette size={15}/>]];
+ const panels=[['Add',<Plus size={15}/>],['Layers',<SquaresFour size={15}/>],['Tokens',<Stack size={15}/>],['Palettes',<Palette size={15}/>]];
  return <div className="atria-builder">
   <header className="builder-topbar">
    <div className="builder-brand-wrap"><Link to="/" className="builder-back"><ArrowLeft size={15}/> Atria</Link><span className="builder-divider"/><strong className="builder-wordmark">atria<span>.</span></strong><small>/ STUDIO</small></div>
