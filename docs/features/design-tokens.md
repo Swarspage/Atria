@@ -16,6 +16,7 @@ The Tokens workspace is a small editable collection for reusable design values. 
 - Delete tokens.
 - Copy an individual token value.
 - Export the current collection as CSS custom properties or JSON.
+- Import tokens from JSON with a review step (see [Importing tokens](#importing-tokens)).
 - Reset the collection to its starter values.
 
 ## 2. Token shape
@@ -75,3 +76,29 @@ The collection is saved in browser local storage through `useStudioData('tokens'
 - [Design foundations](design-foundations.md)
 - [Component library](component-library.md)
 - [State management](../engineering/state-management.md)
+
+## Importing tokens
+
+The Tokens page has an import panel. Paste JSON or choose a `.json` file, press **Preview import**, review the list, then confirm. Nothing is applied until you confirm.
+
+Supported shapes:
+
+```json
+[{ "name": "color.accent", "value": "#315FCE", "type": "color", "group": "Semantic", "description": "Accent colour" }]
+```
+
+```json
+{ "tokens": [{ "name": "space.5", "value": "20px", "type": "dimension" }] }
+```
+
+```json
+{ "color.accent": "#315FCE", "space.5": { "value": "20px", "type": "dimension" } }
+```
+
+Rules:
+
+- `name` and `value` are required. Names use letters, numbers, dots, dashes and underscores.
+- `type` is one of `color`, `dimension`, `font`, `number`, `string` (default `string`). Other types are shown as invalid.
+- `group` is `Primitive` or `Semantic` (default `Primitive`).
+- A name that already exists, or that repeats inside the file, is marked as skipped. Existing tokens are never overwritten.
+- Invalid rows are listed with the reason and are not imported.
