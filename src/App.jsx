@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 import Overview from './pages/Overview.jsx'
 import Foundations from './pages/Foundations.jsx'
@@ -59,7 +59,7 @@ function LandingPage() {
           <span>atria<span className="brand-period">.</span></span>
         </a>
         <div className="nav-links">
-          <Link to="/studio">Studio</Link>
+          <a href="/studio">Studio</a>
           <a href="#foundations">Foundation</a>
           <a href="#components">Components</a>
           <a href="/docs">Docs</a>
@@ -78,7 +78,7 @@ function LandingPage() {
             A thoughtful space to create, organise, and document design systems — bringing design decisions and development closer together.
           </p>
           <div className="hero-actions">
-            <Link className="button button-dark" to="/studio">Open the studio <ArrowRight size={16} /></Link>
+            <a className="button button-dark" href="/studio">Open the studio <ArrowRight size={16} /></a>
             <a className="text-link" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">Explore the repository <ArrowUpRight size={15} /></a>
           </div>
           <div className="hero-footnote"><span className="mono">01 / 04</span><span>DESIGNED FOR TEAMS THAT CARE ABOUT THE DETAILS</span></div>
