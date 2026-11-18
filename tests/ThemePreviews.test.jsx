@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Components from '../src/pages/Components.jsx';
 import Tokens from '../src/pages/Tokens.jsx';
 import Foundations from '../src/pages/Foundations.jsx';
+import DashboardLayout from '../src/layouts/DashboardLayout.jsx';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -12,6 +13,32 @@ beforeAll(() => {
 
 beforeEach(() => {
   window.localStorage.clear();
+});
+
+describe('DashboardLayout top navbar theme preview toggle', () => {
+  it('toggles theme via top navbar and synchronises with nested components', () => {
+    render(
+      <MemoryRouter initialEntries={['/explore/components']}>
+        <Routes>
+          <Route path="/explore" element={<DashboardLayout />}>
+            <Route path="components" element={<Components />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Navbar toggle is present
+    const navbarNav = screen.getByRole('navigation', { name: 'Explore Studio navigation' });
+    const navbarToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
+    expect(navbarToggles.length).toBeGreaterThanOrEqual(1);
+
+    // Click dark toggle in navbar
+    fireEvent.click(navbarToggles[0]);
+
+    // Component preview stage inside Outlet updates to dark
+    const stage = document.querySelector('[data-theme]');
+    expect(stage).toHaveAttribute('data-theme', 'dark');
+  });
 });
 
 describe('Components theme previews', () => {

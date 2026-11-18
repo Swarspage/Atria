@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Check, Copy, Download, Plus, ArrowCounterClockwise as RotateCounterClockwise } from '@phosphor-icons/react';
 import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
 
@@ -110,7 +110,8 @@ function foundationResourceCss(category,resource){
 }
 function FoundationsLibrary(){
  const navigate=useNavigate();const [selected,setSelected]=useState({});
- const [previewTheme,setPreviewTheme]=useState('light');
+ const outlet=useOutletContext();const [localTheme,setLocalTheme]=useState('light');
+ const previewTheme=outlet?.previewTheme??localTheme;const setPreviewTheme=outlet?.setPreviewTheme??setLocalTheme;
  const isDark=previewTheme==='dark';
 
  return <div className="studio-page">
@@ -134,7 +135,8 @@ function FoundationsLibrary(){
 function ResourceDetail({category,resource}){
  const navigate=useNavigate();
  const storageKey='atria:foundation-resource:'+category.id+':'+resource.id;
- const [previewTheme,setPreviewTheme]=useState('light');
+ const outlet=useOutletContext();const [localTheme,setLocalTheme]=useState('light');
+ const previewTheme=outlet?.previewTheme??localTheme;const setPreviewTheme=outlet?.setPreviewTheme??setLocalTheme;
  const isDark=previewTheme==='dark';
 
  const [values,setValues]=useState(()=>{try{const saved=localStorage.getItem(storageKey);return saved?JSON.parse(saved):category.id==='colour'?resource.colors.map(([name,value])=>({name,value})):category.id==='typography'?resource.items.map(([name,size,weight,lineHeight])=>({name,size,weight,lineHeight})):resource.items.map((value,i)=>({name:category.id==='spacing'?'Space '+(i+1):['None','Small','Medium','Large','Pill'][i],value}));}catch{return [];}});

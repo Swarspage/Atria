@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   ArrowUpRight,
@@ -8,6 +8,7 @@ import {
   PuzzlePiece,
   Sparkle,
 } from '@phosphor-icons/react';
+import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
 
 const sections = [
   { name: 'Studio', path: '/studio', icon: <Sparkle size={17} weight="regular" />, number: '04' },
@@ -48,6 +49,8 @@ function ExploreFooter() {
 }
 
 export default function DashboardLayout() {
+  const [previewTheme, setPreviewTheme] = useState('light');
+
   return (
     <div className="explore-page">
       <header className="explore-header">
@@ -56,9 +59,16 @@ export default function DashboardLayout() {
             <AtriaMark />
             <span>atria<span className="brand-period">.</span></span>
           </a>
-          <a className="nav-cta" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">
-            <GithubLogo size={17} weight="regular" /> View on GitHub <ArrowUpRight size={14} />
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ThemePreviewToggle
+              mode={previewTheme}
+              onChange={setPreviewTheme}
+              label="Explore Studio navbar theme toggle"
+            />
+            <a className="nav-cta" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">
+              <GithubLogo size={17} weight="regular" /> View on GitHub <ArrowUpRight size={14} />
+            </a>
+          </div>
         </nav>
       </header>
 
@@ -81,7 +91,7 @@ export default function DashboardLayout() {
         </aside>
 
         <main className="explore-content">
-          <Outlet />
+          <Outlet context={{ previewTheme, setPreviewTheme }} />
         </main>
       </div>
 

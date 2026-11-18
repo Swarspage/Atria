@@ -1,4 +1,5 @@
 import React,{useMemo,useState} from 'react';
+import { useOutletContext } from 'react-router-dom';
 import {Plus,Copy,Download,Trash,MagnifyingGlass,Check} from '@phosphor-icons/react';
 import {useStudioData} from '../data/studioStore.js';
 import {parseTokenImport,rowsToTokens} from '../data/tokenImport.js';
@@ -9,7 +10,7 @@ const action={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px'
 function CopyValue({value,color}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:color||'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
 export default function Tokens(){
  const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);const [importText,setImportText]=useState('');const [review,setReview]=useState(null);
- const [previewTheme,setPreviewTheme]=useState('light');
+ const outlet=useOutletContext();const [localTheme,setLocalTheme]=useState('light');const previewTheme=outlet?.previewTheme??localTheme;const setPreviewTheme=outlet?.setPreviewTheme??setLocalTheme;
  const [draft,setDraft]=useState({name:'',value:'',type:'color',description:'',group:'Primitive'});
  const isDark = previewTheme === 'dark';
 
