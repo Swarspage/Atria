@@ -46,10 +46,11 @@ Before opening a pull request, run:
 
 ```bash
 npm ci
+npm test
 npm run build
 ```
 
-The GitHub Actions workflow runs the production build for pushes and pull requests targeting `main`. A dedicated automated test runner and lint script are not configured yet, so include exact manual verification steps for the behaviour you changed.
+The existing Vitest and Testing Library setup runs with `npm test`. Navigation tests cover primary links, library module routes, and fresh mounts at nested URLs. Also check real document navigation and nested-route refresh in the production preview, since jsdom does not navigate native links. The GitHub Actions workflow runs the production build for pushes and pull requests targeting `main`; a lint script is not configured.
 
 For UI changes, check:
 - desktop and narrow mobile layouts;
