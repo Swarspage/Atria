@@ -2,12 +2,17 @@ import React,{useMemo,useState} from 'react';
 import {Plus,Copy,Download,Trash,MagnifyingGlass,Check} from '@phosphor-icons/react';
 import {useStudioData} from '../data/studioStore.js';
 import {parseTokenImport,rowsToTokens} from '../data/tokenImport.js';
+import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
+
 const control={minWidth:0,padding:'9px 10px',border:'1px solid var(--line)',background:'#fff',color:'var(--ink)',font:'inherit',fontSize:11};
 const action={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid var(--ink)',background:'#242420',color:'#fff',fontSize:10,cursor:'pointer'};
-function CopyValue({value}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
+function CopyValue({value,color}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:color||'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
 export default function Tokens(){
  const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);const [importText,setImportText]=useState('');const [review,setReview]=useState(null);
+ const [previewTheme,setPreviewTheme]=useState('light');
  const [draft,setDraft]=useState({name:'',value:'',type:'color',description:'',group:'Primitive'});
+ const isDark = previewTheme === 'dark';
+
  const visible=useMemo(()=>tokens.filter(t=>(group==='All'||t.group===group)&&[t.name,t.value,t.description].join(' ').toLowerCase().includes(query.toLowerCase())),[tokens,group,query]);
  const css=':root {\n'+tokens.map(t=>'  --atria-'+t.name.replaceAll('.','-')+': '+t.value+';').join('\n')+'\n}';
  const json=JSON.stringify(tokens.map(({name,value,type,description,group})=>({name,value,type,description,group})),null,2);
@@ -18,33 +23,65 @@ export default function Tokens(){
  const applyImport=()=>{const fresh=rowsToTokens(review.rows,()=>crypto.randomUUID());if(!fresh.length)return;save(items=>[...items,...fresh]);setReview(null);setImportText('')};
  const importable=review?review.rows.filter(r=>r.status==='new').length:0;
  const update=(id,field,value)=>save(items=>items.map(t=>t.id===id?{...t,[field]:value}:t));
+
+ const cardControlStyle = isDark ? {
+   ...control,
+   background: '#161618',
+   color: '#f4f3ef',
+   border: '1px solid #38383e',
+ } : control;
+
  return <div className="studio-page">
   <div className="section-index">[ STUDIO / TOKENS ]</div>
-  <div className="studio-page-heading"><div><span className="studio-status">DESIGN VALUES / DEVELOPER READY</span><h2>Tokens</h2></div><div style={{display:'flex',gap:6}}><button style={action} onClick={()=>download('css')}><Download size={13}/> CSS</button><button style={action} onClick={()=>download('json')}><Download size={13}/> JSON</button></div></div>
-  <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',margin:'22px 0 14px'}}><div style={{display:'flex',alignItems:'center',gap:6,border:'1px solid var(--line)',background:'#fff',padding:'0 9px',flex:1,minWidth:170}}><MagnifyingGlass size={14}/><input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...control,border:0,width:'100%'}}/></div>{['All','Primitive','Semantic'].map(g=><button key={g} onClick={()=>setGroup(g)} style={{...control,background:group===g?'#242420':'#fff',color:group===g?'#fff':'var(--ink)',cursor:'pointer'}}>{g}</button>)}</div>
+  <div className="studio-page-heading">
+   <div><span className="studio-status">DESIGN VALUES / DEVELOPER READY</span><h2>Tokens</h2></div>
+   <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}>
+    <button style={action} onClick={()=>download('css')}><Download size={13}/> CSS</button>
+    <button style={action} onClick={()=>download('json')}><Download size={13}/> JSON</button>
+   </div>
+  </div>
+  <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',margin:'22px 0 14px'}}>
+   <div style={{display:'flex',alignItems:'center',gap:6,border:'1px solid var(--line)',background:'#fff',padding:'0 9px',flex:1,minWidth:170}}>
+    <MagnifyingGlass size={14}/>
+    <input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...control,border:0,width:'100%'}}/>
+   </div>
+   {['All','Primitive','Semantic'].map(g=><button key={g} onClick={()=>setGroup(g)} style={{...control,background:group===g?'#242420':'#fff',color:group===g?'#fff':'var(--ink)',cursor:'pointer'}}>{g}</button>)}
+   <ThemePreviewToggle mode={previewTheme} onChange={setPreviewTheme} label="Tokens preview theme" />
+  </div>
   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap',margin:'12px 0'}}>
    <p style={{fontSize:10,color:'#888',margin:0}}>Select multiple tokens to copy them as CSS variables.</p>
    <button style={{...action,opacity:selected.length?1:.5}} disabled={!selected.length} onClick={()=>navigator.clipboard.writeText(':root {\n'+tokens.filter(t=>selected.includes(t.id)).map(t=>'  --atria-'+t.name.replaceAll('.','-')+': '+t.value+';').join('\n')+'\n}') }><Copy size={13}/> Copy selected CSS ({selected.length})</button>
   </div>
-  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
-   {visible.map(t=><article key={t.id} style={{minWidth:0,padding:14,border:'1px solid '+(selected.includes(t.id)?'#242420':'var(--line)'),background:'#fff'}}>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,marginBottom:12}}><span style={{fontSize:8,letterSpacing:'.08em',color:'#999',textTransform:'uppercase'}}>{t.group} / {t.type}</span><input type="checkbox" aria-label={'Select '+t.name} checked={selected.includes(t.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,t.id]:old.filter(id=>id!==t.id))} style={{accentColor:'#242420'}}/></div>
-    <input value={t.name} aria-label="Token name" onChange={e=>update(t.id,'name',e.target.value)} style={{...control,width:'100%',fontWeight:600}}/>
-    <div style={{display:'flex',alignItems:'center',gap:7,marginTop:10}}>
-     {t.type==='color'&&<input type="color" aria-label="Token colour" value={/^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#777777'} onChange={e=>update(t.id,'value',e.target.value)} style={{width:34,height:34,padding:2,border:'1px solid var(--line)',background:'#fff'}}/>}
-     <input value={t.value} aria-label="Token value" onChange={e=>update(t.id,'value',e.target.value)} style={{...control,flex:1,minWidth:0}}/>
-     <CopyValue value={'--atria-'+t.name.replaceAll('.','-')+': '+t.value+';'}/>
-     <button title="Delete token" onClick={()=>{save(items=>items.filter(x=>x.id!==t.id));setSelected(old=>old.filter(id=>id!==t.id))}} style={{border:0,background:'transparent',cursor:'pointer'}}><Trash size={14}/></button>
+  <div data-theme={previewTheme} style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
+   {visible.map(t=><article key={t.id} style={{
+     minWidth:0,
+     padding:14,
+     border:'1px solid '+(selected.includes(t.id)?(isDark?'#f4f3ef':'#242420'):(isDark?'#2e2e34':'var(--line)')),
+     background:isDark?'#1c1c1f':'#fff',
+     color:isDark?'#f4f3ef':'inherit',
+     transition:'background 0.2s ease, border-color 0.2s ease'
+   }}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,marginBottom:12}}>
+     <span style={{fontSize:8,letterSpacing:'.08em',color:isDark?'#a1a1aa':'#999',textTransform:'uppercase'}}>{t.group} / {t.type}</span>
+     <input type="checkbox" aria-label={'Select '+t.name} checked={selected.includes(t.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,t.id]:old.filter(id=>id!==t.id))} style={{accentColor:isDark?'#f4f3ef':'#242420'}}/>
     </div>
-    <p style={{fontSize:10,color:'#888',lineHeight:1.5,minHeight:28,margin:'9px 0 0'}}>{t.description||'No description added.'}</p>
-    <button onClick={()=>setActiveToken(t)} style={{...control,width:'100%',marginTop:10,cursor:'pointer'}}>Open token <span style={{float:'right'}}>↗</span></button>
+    <input value={t.name} aria-label="Token name" onChange={e=>update(t.id,'name',e.target.value)} style={{...cardControlStyle,width:'100%',fontWeight:600}}/>
+    <div style={{display:'flex',alignItems:'center',gap:7,marginTop:10}}>
+     {t.type==='color'&&<input type="color" aria-label="Token colour" value={/^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#777777'} onChange={e=>update(t.id,'value',e.target.value)} style={{width:34,height:34,padding:2,border:'1px solid '+(isDark?'#3f3f46':'var(--line)'),background:isDark?'#161618':'#fff',borderRadius:3,boxShadow:isDark?'0 0 0 1px rgba(255,255,255,0.2)':'0 0 0 1px rgba(0,0,0,0.12)'}}/>}
+     <input value={t.value} aria-label="Token value" onChange={e=>update(t.id,'value',e.target.value)} style={{...cardControlStyle,flex:1,minWidth:0}}/>
+     <CopyValue value={'--atria-'+t.name.replaceAll('.','-')+': '+t.value+';'} color={isDark?'#f4f3ef':undefined}/>
+     <button title="Delete token" onClick={()=>{save(items=>items.filter(x=>x.id!==t.id));setSelected(old=>old.filter(id=>id!==t.id))}} style={{border:0,background:'transparent',color:isDark?'#a1a1aa':'inherit',cursor:'pointer'}}><Trash size={14}/></button>
+    </div>
+    <p style={{fontSize:10,color:isDark?'#a1a1aa':'#888',lineHeight:1.5,minHeight:28,margin:'9px 0 0'}}>{t.description||'No description added.'}</p>
+    <button onClick={()=>setActiveToken(t)} style={{...cardControlStyle,width:'100%',marginTop:10,cursor:'pointer'}}>Open token <span style={{float:'right'}}>↗</span></button>
    </article>)}
    {!visible.length&&<p style={{padding:16,color:'#888',fontSize:11}}>No matching tokens.</p>}
   </div>
-  {activeToken&&<div role="presentation" onClick={()=>setActiveToken(null)} style={{position:'fixed',inset:0,zIndex:1100,background:'#17171780',display:'grid',placeItems:'center',padding:18}}>
-   <section role="dialog" aria-modal="true" aria-labelledby="token-detail-title" onClick={e=>e.stopPropagation()} style={{width:'min(100%,520px)',maxHeight:'85vh',overflow:'auto',background:'#fff',border:'1px solid var(--line)',padding:20}}>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><div><span className="studio-kicker">{activeToken.group} / {activeToken.type}</span><h3 id="token-detail-title" style={{fontSize:20,margin:'7px 0'}}>{activeToken.name}</h3></div><button onClick={()=>setActiveToken(null)} aria-label="Close token details" style={control}>Close</button></div>
-    <p style={{fontSize:12,color:'#777'}}>{activeToken.description||'No description added.'}</p>
+  {activeToken&&<div role="presentation" onClick={()=>setActiveToken(null)} style={{position:'fixed',inset:0,zIndex:1100,background:isDark?'#000000b3':'#17171780',display:'grid',placeItems:'center',padding:18}}>
+   <section role="dialog" aria-modal="true" aria-labelledby="token-detail-title" onClick={e=>e.stopPropagation()} style={{width:'min(100%,520px)',maxHeight:'85vh',overflow:'auto',background:isDark?'#1c1c1f':'#fff',border:'1px solid '+(isDark?'#2e2e34':'var(--line)'),color:isDark?'#f4f3ef':'inherit',padding:20,borderRadius:8}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><div><span className="studio-kicker">{activeToken.group} / {activeToken.type}</span><h3 id="token-detail-title" style={{fontSize:20,margin:'7px 0',color:isDark?'#f4f3ef':'inherit'}}>{activeToken.name}</h3></div><button onClick={()=>setActiveToken(null)} aria-label="Close token details" style={{...control,background:isDark?'#27272a':'#fff',color:isDark?'#f4f3ef':'var(--ink)',border:'1px solid '+(isDark?'#38383e':'var(--line)')}}>Close</button></div>
+    <p style={{fontSize:12,color:isDark?'#a1a1aa':'#777'}}>{activeToken.description||'No description added.'}</p>
+    {activeToken.type==='color'&&<div style={{display:'flex',alignItems:'center',gap:10,margin:'12px 0'}}><span style={{width:36,height:36,borderRadius:4,background:activeToken.value,boxShadow:isDark?'0 0 0 1px rgba(255,255,255,0.22)':'0 0 0 1px rgba(0,0,0,0.15)'}}/><code style={{fontSize:12,color:isDark?'#f4f3ef':'#242420'}}>{activeToken.value}</code></div>}
     <pre style={{whiteSpace:'pre-wrap',padding:14,background:'#242420',color:'#e9e7e1',fontSize:11,lineHeight:1.7}}>--atria-{activeToken.name.replaceAll('.','-')}: {activeToken.value};</pre>
     <button style={action} onClick={()=>navigator.clipboard.writeText('--atria-'+activeToken.name.replaceAll('.','-')+': '+activeToken.value+';')}><Copy size={13}/> Copy CSS</button>
    </section>
