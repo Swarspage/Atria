@@ -316,7 +316,13 @@ h2 { font-size: clamp(38px, 5vw, 57px); line-height: 1.05; letter-spacing: -.07e
 .explore-home-link { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 25px; color: #89867e; font-size: 10px; }
 .explore-home-link:hover { color: var(--ink); }
 .explore-content { min-width: 0; padding-top: 3px; }
-.explore-content .studio-page { max-width: 850px; }
+.explore-content .studio-page {
+  max-width: 850px;
+  min-height: auto;
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
 .explore-content .studio-page-heading { margin-top: 24px; }
 .explore-footer { margin-top: auto; border-top: 1px solid var(--line); }
 .explore-footer .footer-top { padding-top: 28px; }
@@ -474,7 +480,7 @@ h2 { font-size: clamp(38px, 5vw, 57px); line-height: 1.05; letter-spacing: -.07e
 
 
 /* Atria visual component studio */
-.studio-page{min-height:100vh;background:#f7f7f5;color:#242420;font-family:Manrope,sans-serif;padding:0 28px 60px}
+.studio-page{min-height:auto;background:transparent;color:inherit;font-family:Manrope,sans-serif;padding:0}
 .studio-top{height:66px;max-width:1440px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #deddd8}
 .studio-top>a,.studio-top-actions,.studio-top-actions button,.studio-brand{display:flex;align-items:center;gap:8px;font-size:11px}
 .studio-brand{font-weight:800;font-size:17px;gap:6px}.studio-brand>span:last-of-type{color:#999}.studio-brand small{font:9px 'DM Mono',monospace;color:#999;letter-spacing:.1em;margin-left:6px}
@@ -953,5 +959,68 @@ html[data-theme="dark"] body {
   background: #121214;
   color: #f4f3ef;
 }
+
+/* Explore sub-pages in dark theme */
+[data-theme="dark"] .studio-page,
+html[data-theme="dark"] .studio-page,
+.explore-page[data-theme="dark"] .studio-page {
+  background: transparent !important;
+  color: #f4f3ef !important;
+}
+
+[data-theme="dark"] .studio-page h2,
+[data-theme="dark"] .studio-page h3,
+[data-theme="dark"] .studio-page strong,
+html[data-theme="dark"] .studio-page h2,
+html[data-theme="dark"] .studio-page h3,
+html[data-theme="dark"] .studio-page strong,
+.explore-page[data-theme="dark"] .studio-page h2,
+.explore-page[data-theme="dark"] .studio-page h3,
+.explore-page[data-theme="dark"] .studio-page strong {
+  color: #f4f3ef !important;
+}
+
+[data-theme="dark"] .studio-page p,
+html[data-theme="dark"] .studio-page p,
+.explore-page[data-theme="dark"] .studio-page p {
+  color: #a1a1aa !important;
+}
+
+[data-theme="dark"] .studio-page .studio-kicker,
+[data-theme="dark"] .studio-page .studio-status,
+[data-theme="dark"] .studio-page .section-index,
+[data-theme="dark"] .studio-page .studio-page-count,
+html[data-theme="dark"] .studio-page .studio-kicker,
+html[data-theme="dark"] .studio-page .studio-status,
+html[data-theme="dark"] .studio-page .section-index,
+html[data-theme="dark"] .studio-page .studio-page-count,
+.explore-page[data-theme="dark"] .studio-page .studio-kicker,
+.explore-page[data-theme="dark"] .studio-page .studio-status,
+.explore-page[data-theme="dark"] .studio-page .section-index,
+.explore-page[data-theme="dark"] .studio-page .studio-page-count {
+  color: #71717a !important;
+}
+
+/* Component inspector responsive grid */
+.component-inspector-grid {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.65fr) minmax(0, 1.8fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+@media (max-width: 720px) {
+  .component-inspector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-cta {
+    padding: 8px 10px;
+    font-size: 8px;
+    gap: 5px;
+  }
+}
+
 
 

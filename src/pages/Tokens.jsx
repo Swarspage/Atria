@@ -3,7 +3,6 @@ import { useOutletContext } from 'react-router-dom';
 import {Plus,Copy,Download,Trash,MagnifyingGlass,Check} from '@phosphor-icons/react';
 import {useStudioData} from '../data/studioStore.js';
 import {parseTokenImport,rowsToTokens} from '../data/tokenImport.js';
-import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
 import { useThemePreview } from '../context/ThemeContext.jsx';
 
 const control={minWidth:0,padding:'9px 10px',border:'1px solid var(--line)',background:'#fff',color:'var(--ink)',font:'inherit',fontSize:11};
@@ -43,12 +42,11 @@ export default function Tokens(){
    </div>
   </div>
   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',margin:'22px 0 14px'}}>
-   <div style={{display:'flex',alignItems:'center',gap:6,border:'1px solid var(--line)',background:'#fff',padding:'0 9px',flex:1,minWidth:170}}>
-    <MagnifyingGlass size={14}/>
-    <input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...control,border:0,width:'100%'}}/>
+   <div style={{display:'flex',alignItems:'center',gap:6,border:'1px solid '+(isDark?'#38383e':'var(--line)'),background:isDark?'#1c1c1f':'#fff',padding:'0 9px',flex:1,minWidth:170}}>
+    <MagnifyingGlass size={14} color={isDark?'#a1a1aa':undefined}/>
+    <input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...cardControlStyle,border:0,width:'100%'}}/>
    </div>
-   {['All','Primitive','Semantic'].map(g=><button key={g} onClick={()=>setGroup(g)} style={{...control,background:group===g?'#242420':'#fff',color:group===g?'#fff':'var(--ink)',cursor:'pointer'}}>{g}</button>)}
-   <ThemePreviewToggle mode={previewTheme} onChange={setPreviewTheme} label="Tokens preview theme" />
+   {['All','Primitive','Semantic'].map(g=><button key={g} onClick={()=>setGroup(g)} style={{...cardControlStyle,background:group===g?(isDark?'#f4f3ef':'#242420'):(isDark?'#27272a':'#fff'),color:group===g?(isDark?'#121214':'#fff'):(isDark?'#f4f3ef':'var(--ink)'),borderColor:isDark?'#38383e':'var(--line)',cursor:'pointer'}}>{g}</button>)}
   </div>
   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap',margin:'12px 0'}}>
    <p style={{fontSize:10,color:'#888',margin:0}}>Select multiple tokens to copy them as CSS variables.</p>
@@ -88,24 +86,36 @@ export default function Tokens(){
     <button style={action} onClick={()=>navigator.clipboard.writeText('--atria-'+activeToken.name.replaceAll('.','-')+': '+activeToken.value+';')}><Copy size={13}/> Copy CSS</button>
    </section>
   </div>}
-  <section style={{marginTop:20,padding:16,border:'1px solid var(--line)',background:'#fafaf8'}}><div className="placeholder-panel-heading"><div><span className="studio-kicker">ADD TO COLLECTION</span><h3>New token</h3></div></div><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(135px,1fr))',gap:8}}><input aria-label="Token name" placeholder="color.brand.primary" value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})} style={control}/><input aria-label="Token value" placeholder="#171717 or 16px" value={draft.value} onChange={e=>setDraft({...draft,value:e.target.value})} style={control}/><select aria-label="Token type" value={draft.type} onChange={e=>setDraft({...draft,type:e.target.value})} style={control}><option value="color">Colour</option><option value="dimension">Dimension</option><option value="font">Font</option><option value="number">Number</option><option value="string">String</option></select><select aria-label="Token group" value={draft.group} onChange={e=>setDraft({...draft,group:e.target.value})} style={control}><option>Primitive</option><option>Semantic</option></select></div><div style={{display:'flex',gap:8,marginTop:8}}><input aria-label="Description" placeholder="Short usage note (optional)" value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})} style={{...control,flex:1}}/><button style={action} onClick={add}><Plus size={13}/> Add</button></div></section>
-  <section style={{marginTop:22,padding:16,border:'1px solid var(--line)',background:'#fafaf8'}}>
-   <div className="placeholder-panel-heading"><div><span className="studio-kicker">IMPORT / REVIEW BEFORE APPLYING</span><h3>Import tokens from JSON</h3></div></div>
-   <p style={{fontSize:10,color:'#888',lineHeight:1.6,margin:'0 0 10px'}}>Paste JSON or choose a file. Accepts an array of tokens (the same shape as the JSON export), an object with a "tokens" array, or an object keyed by token name. Existing tokens are never overwritten.</p>
-   <textarea aria-label="Token JSON to import" placeholder={'[{"name":"color.accent","value":"#315FCE","type":"color"}]'} value={importText} onChange={e=>{setImportText(e.target.value);setReview(null)}} rows={5} style={{...control,width:'100%',fontFamily:'monospace',resize:'vertical'}}/>
+  <section style={{marginTop:20,padding:16,border:'1px solid '+(isDark?'#2e2e34':'var(--line)'),background:isDark?'#18181b':'#fafaf8',color:isDark?'#f4f3ef':'inherit'}}>
+   <div className="placeholder-panel-heading"><div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>ADD TO COLLECTION</span><h3 style={{margin:'4px 0',color:isDark?'#f4f3ef':'inherit'}}>New token</h3></div></div>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(135px,1fr))',gap:8}}>
+    <input aria-label="Token name" placeholder="color.brand.primary" value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})} style={cardControlStyle}/>
+    <input aria-label="Token value" placeholder="#171717 or 16px" value={draft.value} onChange={e=>setDraft({...draft,value:e.target.value})} style={cardControlStyle}/>
+    <select aria-label="Token type" value={draft.type} onChange={e=>setDraft({...draft,type:e.target.value})} style={cardControlStyle}><option value="color">Colour</option><option value="dimension">Dimension</option><option value="font">Font</option><option value="number">Number</option><option value="string">String</option></select>
+    <select aria-label="Token group" value={draft.group} onChange={e=>setDraft({...draft,group:e.target.value})} style={cardControlStyle}><option>Primitive</option><option>Semantic</option></select>
+   </div>
+   <div style={{display:'flex',gap:8,marginTop:8}}>
+    <input aria-label="Description" placeholder="Short usage note (optional)" value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})} style={{...cardControlStyle,flex:1}}/>
+    <button style={action} onClick={add}><Plus size={13}/> Add</button>
+   </div>
+  </section>
+  <section style={{marginTop:22,padding:16,border:'1px solid '+(isDark?'#2e2e34':'var(--line)'),background:isDark?'#18181b':'#fafaf8',color:isDark?'#f4f3ef':'inherit'}}>
+   <div className="placeholder-panel-heading"><div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>IMPORT / REVIEW BEFORE APPLYING</span><h3 style={{margin:'4px 0',color:isDark?'#f4f3ef':'inherit'}}>Import tokens from JSON</h3></div></div>
+   <p style={{fontSize:10,color:isDark?'#a1a1aa':'#888',lineHeight:1.6,margin:'0 0 10px'}}>Paste JSON or choose a file. Accepts an array of tokens (the same shape as the JSON export), an object with a "tokens" array, or an object keyed by token name. Existing tokens are never overwritten.</p>
+   <textarea aria-label="Token JSON to import" placeholder={'[{"name":"color.accent","value":"#315FCE","type":"color"}]'} value={importText} onChange={e=>{setImportText(e.target.value);setReview(null)}} rows={5} style={{...cardControlStyle,width:'100%',fontFamily:'monospace',resize:'vertical'}}/>
    <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:8}}>
     <button style={action} onClick={previewImport} disabled={!importText.trim()}>Preview import</button>
-    <label style={{...control,cursor:'pointer'}}>Choose JSON file<input type="file" accept="application/json,.json" aria-label="Choose JSON file" onChange={loadImportFile} style={{display:'none'}}/></label>
+    <label style={{...cardControlStyle,cursor:'pointer'}}>Choose JSON file<input type="file" accept="application/json,.json" aria-label="Choose JSON file" onChange={loadImportFile} style={{display:'none'}}/></label>
    </div>
    {review&&<div style={{marginTop:12}}>
-    {review.fileError?<p role="alert" style={{fontSize:11,color:'#b54747'}}>{review.fileError}</p>:<>
+    {review.fileError?<p role="alert" style={{fontSize:11,color:'#ef4444'}}>{review.fileError}</p>:<>
      <p aria-live="polite" style={{fontSize:11,margin:'0 0 8px'}}>{importable} of {review.rows.length} tokens can be imported.</p>
-     <ul style={{listStyle:'none',margin:0,padding:0,display:'grid',gap:5,maxHeight:260,overflow:'auto'}}>{review.rows.map(r=><li key={r.index} data-status={r.status} style={{padding:'8px 10px',border:'1px solid '+(r.status==='new'?'var(--line)':r.status==='invalid'?'#b54747':'#c47a22'),background:'#fff',fontSize:11}}><strong>{r.name||'(no name)'}</strong> <span style={{color:'#777'}}>{r.value} {r.status==='new'?'':'/ '+r.type}</span><span style={{float:'right',fontSize:9,textTransform:'uppercase',color:r.status==='new'?'#2f7d52':r.status==='invalid'?'#b54747':'#876321'}}>{r.status==='new'?'New':r.status==='invalid'?'Invalid':'Skipped'}</span>{r.error&&<small style={{display:'block',marginTop:4,color:r.status==='invalid'?'#b54747':'#876321'}}>{r.error}</small>}</li>)}</ul>
+     <ul style={{listStyle:'none',margin:0,padding:0,display:'grid',gap:5,maxHeight:260,overflow:'auto'}}>{review.rows.map(r=><li key={r.index} data-status={r.status} style={{padding:'8px 10px',border:'1px solid '+(r.status==='new'?(isDark?'#2e2e34':'var(--line)'):r.status==='invalid'?'#b54747':'#c47a22'),background:isDark?'#141416':'#fff',color:isDark?'#f4f3ef':'inherit',fontSize:11}}><strong>{r.name||'(no name)'}</strong> <span style={{color:isDark?'#a1a1aa':'#777'}}>{r.value} {r.status==='new'?'':'/ '+r.type}</span><span style={{float:'right',fontSize:9,textTransform:'uppercase',color:r.status==='new'?'#4ade80':r.status==='invalid'?'#f87171':'#fbbf24'}}>{r.status==='new'?'New':r.status==='invalid'?'Invalid':'Skipped'}</span>{r.error&&<small style={{display:'block',marginTop:4,color:r.status==='invalid'?'#f87171':'#fbbf24'}}>{r.error}</small>}</li>)}</ul>
      <button style={{...action,marginTop:10,opacity:importable?1:.5}} disabled={!importable} onClick={applyImport}>Import {importable} token{importable===1?'':'s'}</button>
     </>}
    </div>}
   </section>
-  <section style={{marginTop:22}}><div className="placeholder-panel-heading"><div><span className="studio-kicker">LIVE EXPORT PREVIEW</span><h3>CSS custom properties</h3></div><CopyValue value={css}/></div><pre style={{whiteSpace:'pre',overflowX:'auto',padding:15,background:'#242420',color:'#e9e7e1',fontSize:10,lineHeight:1.8}}>{css}</pre></section>
-  <div style={{display:'flex',justifyContent:'flex-end',marginTop:14}}><button style={control} onClick={()=>{if(window.confirm('Restore the starter token collection?'))reset()}}>Reset starter tokens</button></div>
+  <section style={{marginTop:22}}><div className="placeholder-panel-heading"><div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>LIVE EXPORT PREVIEW</span><h3 style={{color:isDark?'#f4f3ef':'inherit'}}>CSS custom properties</h3></div><CopyValue value={css} color={isDark?'#f4f3ef':undefined}/></div><pre style={{whiteSpace:'pre',overflowX:'auto',padding:15,background:isDark?'#141416':'#242420',color:'#e9e7e1',border:'1px solid '+(isDark?'#27272a':'#333'),fontSize:10,lineHeight:1.8}}>{css}</pre></section>
+  <div style={{display:'flex',justifyContent:'flex-end',marginTop:14}}><button style={{...cardControlStyle,cursor:'pointer'}} onClick={()=>{if(window.confirm('Restore the starter token collection?'))reset()}}>Reset starter tokens</button></div>
  </div>;
 }

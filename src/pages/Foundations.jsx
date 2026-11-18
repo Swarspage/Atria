@@ -1,10 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Check, Copy, Download, Plus, ArrowCounterClockwise as RotateCounterClockwise } from '@phosphor-icons/react';
-import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
 import { useThemePreview } from '../context/ThemeContext.jsx';
 
-const buttonStyle = { display:'inline-flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid var(--line)', background:'#fff', color:'var(--ink)', fontSize:11, cursor:'pointer' };
+const getButtonStyle = (dark) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 7,
+  padding: '9px 12px',
+  border: '1px solid ' + (dark ? '#38383e' : 'var(--line)'),
+  background: dark ? '#27272a' : '#fff',
+  color: dark ? '#f4f3ef' : 'var(--ink)',
+  fontSize: 11,
+  cursor: 'pointer',
+});
+const buttonStyle = getButtonStyle(false);
 const palettes = [
   {id:'neutral',name:'Neutral & Minimal',description:'A quiet, versatile foundation for product interfaces.',tags:['Neutral','Versatile'],colors:[['Ink','#171717'],['Graphite','#454545'],['Stone','#85827B'],['Mist','#D5D1C8'],['Paper','#EEECE7']]},
   {id:'warm-earth',name:'Warm Earth',description:'Grounded clay, sand and natural tones.',tags:['Warm','Organic'],colors:[['Cocoa','#49352D'],['Terracotta','#A85D43'],['Clay','#C98768'],['Sand','#E6CDB2'],['Linen','#F5EBDD']]},
@@ -42,7 +53,7 @@ const categories = [
  {id:'spacing',label:'Spacing',description:'Layout rhythm and spacing scales',resources:spaceSets},
  {id:'radius',label:'Radius & shadows',description:'Surface shape and elevation',resources:radiusSets}
 ];
-function CopyButton({value,label='Copy'}) { const [copied,setCopied]=useState(false); return <button style={buttonStyle} onClick={async()=>{try{await navigator.clipboard.writeText(value);setCopied(true);window.setTimeout(()=>setCopied(false),1200)}catch{}}}>{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':label}</button>; }
+function CopyButton({value,label='Copy',isDark}) { const [copied,setCopied]=useState(false); return <button style={getButtonStyle(isDark)} onClick={async()=>{try{await navigator.clipboard.writeText(value);setCopied(true);window.setTimeout(()=>setCopied(false),1200)}catch{}}}>{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':label}</button>; }
 function downloadFile(name,content,type='text/css'){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
 function ResourceCard({resource,category,onClick,selected,onSelect,isDark}) {
  return <article style={{
@@ -120,16 +131,15 @@ function FoundationsLibrary(){
   <div className="section-index">[ STUDIO / FOUNDATIONS ]</div>
   <div className="studio-page-heading">
    <div><span className="studio-status">DESIGN RESOURCE LIBRARY</span><h2>Foundations</h2></div>
-   <ThemePreviewToggle mode={previewTheme} onChange={setPreviewTheme} label="Foundations preview theme" />
   </div>
-  <p style={{fontSize:13,color:'#777',lineHeight:1.7,maxWidth:600,margin:'8px 0 28px'}}>Explore ready-to-use foundations for your next product. Open any resource to customise its values, copy them or export them for your project.</p>
+  <p style={{fontSize:13,color:isDark?'#a1a1aa':'#777',lineHeight:1.7,maxWidth:600,margin:'8px 0 28px'}}>Explore ready-to-use foundations for your next product. Open any resource to customise its values, copy them or export them for your project.</p>
   {categories.map(category=><section key={category.id} style={{marginBottom:30}}>
-   <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:12,marginBottom:12}}><div><span className="studio-kicker">{category.resources.length} RESOURCES</span><h3 style={{fontSize:18,margin:'5px 0'}}>{category.label}</h3><p style={{fontSize:11,color:'#888',margin:0}}>{category.description}</p></div></div>
+   <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:12,marginBottom:12}}><div><span className="studio-kicker">{category.resources.length} RESOURCES</span><h3 style={{fontSize:18,margin:'5px 0',color:isDark?'#f4f3ef':'inherit'}}>{category.label}</h3><p style={{fontSize:11,color:isDark?'#a1a1aa':'#888',margin:0}}>{category.description}</p></div></div>
    <div data-theme={previewTheme} style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>
      {category.resources.map(resource=><ResourceCard key={resource.id} resource={resource} category={category} selected={(selected[category.id]||[]).includes(resource.id)} onSelect={()=>setSelected(old=>({...old,[category.id]:(old[category.id]||[]).includes(resource.id)?old[category.id].filter(id=>id!==resource.id):[...(old[category.id]||[]),resource.id]}))} onClick={()=>navigate('/explore/foundations/'+category.id+'/'+resource.id)} isDark={isDark}/>)}
    </div>
    <div style={{display:'flex',justifyContent:'flex-end',marginTop:10}}>
-     <button style={buttonStyle} disabled={!(selected[category.id]||[]).length} onClick={()=>navigator.clipboard.writeText(category.resources.filter(r=>(selected[category.id]||[]).includes(r.id)).map(r=>'/* '+r.name+' */\n'+foundationResourceCss(category,r)).join('\n\n'))}><Copy size={13}/> Copy selected CSS ({(selected[category.id]||[]).length})</button>
+     <button style={getButtonStyle(isDark)} disabled={!(selected[category.id]||[]).length} onClick={()=>navigator.clipboard.writeText(category.resources.filter(r=>(selected[category.id]||[]).includes(r.id)).map(r=>'/* '+r.name+' */\n'+foundationResourceCss(category,r)).join('\n\n'))}><Copy size={13}/> Copy selected CSS ({(selected[category.id]||[]).length})</button>
    </div>
   </section>)}
  </div>;
@@ -157,17 +167,16 @@ function ResourceDetail({category,resource}){
  } : buttonStyle;
 
  return <div className="studio-page">
-  <button onClick={()=>navigate('/explore/foundations')} style={{...buttonStyle,marginBottom:22}}><ArrowLeft size={14}/> All foundations</button>
+  <button onClick={()=>navigate('/explore/foundations')} style={{...getButtonStyle(isDark),marginBottom:22}}><ArrowLeft size={14}/> All foundations</button>
   <div className="section-index">[ FOUNDATIONS / {category.label.toUpperCase()} ]</div>
   <div className="studio-page-heading">
    <div><span className="studio-status">CUSTOMISABLE RESOURCE</span><h2>{resource.name}</h2></div>
    <div style={{display:'flex',gap:7,flexWrap:'wrap',alignItems:'center'}}>
-    <ThemePreviewToggle mode={previewTheme} onChange={setPreviewTheme} label="Resource preview theme" />
-    <CopyButton value={css} label="Copy CSS"/>
-    <button style={buttonStyle} onClick={()=>downloadFile(resource.id+'.css',css)}><Download size={14}/> Export CSS</button>
+    <CopyButton value={css} label="Copy CSS" isDark={isDark}/>
+    <button style={getButtonStyle(isDark)} onClick={()=>downloadFile(resource.id+'.css',css)}><Download size={14}/> Export CSS</button>
    </div>
   </div>
-  <p style={{fontSize:12,color:'#777',lineHeight:1.6,margin:'8px 0 22px'}}>{resource.description} Changes are saved in this browser and won't alter the original library preset.</p>
+  <p style={{fontSize:12,color:isDark?'#a1a1aa':'#777',lineHeight:1.6,margin:'8px 0 22px'}}>{resource.description} Changes are saved in this browser and won't alter the original library preset.</p>
   
   {category.id==='colour'&&<section>
     <div data-theme={previewTheme} style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(145px,1fr))',gap:10}}>
@@ -215,12 +224,12 @@ function ResourceDetail({category,resource}){
           />
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8}}>
             <code style={{fontSize:11,color:isDark?'#f4f3ef':'inherit'}}>{v.value.toUpperCase()}</code>
-            <CopyButton value={v.value}/>
+            <CopyButton value={v.value} isDark={isDark}/>
           </div>
         </article>
       ))}
     </div>
-    <button style={{...buttonStyle,marginTop:12}} onClick={()=>save([...values,{name:'New colour',value:'#A0A0A0'}])}><Plus size={14}/> Add colour</button>
+    <button style={{...getButtonStyle(isDark),marginTop:12}} onClick={()=>save([...values,{name:'New colour',value:'#A0A0A0'}])}><Plus size={14}/> Add colour</button>
   </section>}
 
   {category.id==='typography'&&<section data-theme={previewTheme} style={{
@@ -282,16 +291,16 @@ function ResourceDetail({category,resource}){
 
   <section style={{marginTop:26}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,marginBottom:10}}>
-      <div><span className="studio-kicker">DEVELOPER HANDOFF</span><h3 style={{margin:'4px 0',fontSize:16}}>Export your resource</h3></div>
+      <div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>DEVELOPER HANDOFF</span><h3 style={{margin:'4px 0',fontSize:16,color:isDark?'#f4f3ef':'inherit'}}>Export your resource</h3></div>
       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-        <CopyButton value={json} label="Copy JSON"/>
-        <button style={buttonStyle} onClick={()=>downloadFile(resource.id+'.json',json,'application/json')}><Download size={14}/> JSON</button>
+        <CopyButton value={json} label="Copy JSON" isDark={isDark}/>
+        <button style={getButtonStyle(isDark)} onClick={()=>downloadFile(resource.id+'.json',json,'application/json')}><Download size={14}/> JSON</button>
       </div>
     </div>
-    <pre style={{whiteSpace:'pre',overflowX:'auto',padding:15,background:'#242420',color:'#e9e7e1',fontSize:10,lineHeight:1.8}}>{css}</pre>
+    <pre style={{whiteSpace:'pre',overflowX:'auto',padding:15,background:isDark?'#141416':'#242420',color:'#e9e7e1',border:'1px solid '+(isDark?'#27272a':'#333'),fontSize:10,lineHeight:1.8}}>{css}</pre>
   </section>
   <div style={{display:'flex',justifyContent:'flex-end',marginTop:16}}>
-    <button style={buttonStyle} onClick={reset}><RotateCounterClockwise size={14}/> Reset this resource</button>
+    <button style={getButtonStyle(isDark)} onClick={reset}><RotateCounterClockwise size={14}/> Reset this resource</button>
   </div>
  </div>;
 }

@@ -191,11 +191,6 @@ function LandingPage() {
             <div className="preview-top">
               <span>COMPONENT PLAYGROUND</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ThemePreviewToggle
-                  mode={previewTheme}
-                  onChange={setPreviewTheme}
-                  label="Playground theme toggle"
-                />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: isDark ? '#a1a1aa' : '#85837d' }}>
                   {previewTheme.toUpperCase()} PREVIEW <span className="live-dot" />
                 </span>

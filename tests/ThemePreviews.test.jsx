@@ -21,35 +21,46 @@ beforeEach(() => {
   document.documentElement.removeAttribute('data-theme');
 });
 
-describe('DashboardLayout top navbar theme preview toggle', () => {
-  it('toggles theme via top navbar and synchronises with nested components', () => {
-    render(
-      <MemoryRouter initialEntries={['/explore/components']}>
+function renderExplore(path) {
+  return render(
+    <ThemeProvider>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/explore" element={<DashboardLayout />}>
             <Route path="components" element={<Components />} />
+            <Route path="tokens" element={<Tokens />} />
+            <Route path="foundations" element={<Foundations />} />
+            <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
+            <Route index element={<Overview />} />
           </Route>
         </Routes>
       </MemoryRouter>
-    );
+    </ThemeProvider>
+  );
+}
 
-    // Navbar toggle is present
+describe('DashboardLayout top navbar theme preview toggle', () => {
+  it('toggles theme via top navbar and synchronises with nested components', () => {
+    renderExplore('/explore/components');
+
+    // Navbar toggle is present and single (no duplicate in content)
     const navbarNav = screen.getByRole('navigation', { name: 'Explore Studio navigation' });
+    expect(navbarNav).toBeInTheDocument();
     const navbarToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
-    expect(navbarToggles.length).toBeGreaterThanOrEqual(1);
+    expect(navbarToggles.length).toBe(1);
 
     // Click dark toggle in navbar
     fireEvent.click(navbarToggles[0]);
 
-    // Component preview stage inside Outlet updates to dark
-    const stage = document.querySelector('[data-theme]');
-    expect(stage).toHaveAttribute('data-theme', 'dark');
+    // Explore page updates to dark
+    const page = document.querySelector('.explore-page');
+    expect(page).toHaveAttribute('data-theme', 'dark');
   });
 });
 
 describe('Components theme previews', () => {
   it('toggles between light and dark preview modes', () => {
-    render(<Components />);
+    renderExplore('/explore/components');
     
     const lightToggle = screen.getByRole('button', { name: /light theme preview/i });
     const darkToggle = screen.getByRole('button', { name: /dark theme preview/i });
@@ -58,23 +69,23 @@ describe('Components theme previews', () => {
     expect(darkToggle).toHaveAttribute('aria-pressed', 'false');
 
     // Default stage is light
-    const stage = document.querySelector('[data-theme]');
-    expect(stage).toHaveAttribute('data-theme', 'light');
+    const page = document.querySelector('.explore-page');
+    expect(page).toHaveAttribute('data-theme', 'light');
 
     // Switch to dark theme
     fireEvent.click(darkToggle);
     expect(lightToggle).toHaveAttribute('aria-pressed', 'false');
     expect(darkToggle).toHaveAttribute('aria-pressed', 'true');
-    expect(stage).toHaveAttribute('data-theme', 'dark');
+    expect(page).toHaveAttribute('data-theme', 'dark');
 
     // Switch back to light theme
     fireEvent.click(lightToggle);
     expect(lightToggle).toHaveAttribute('aria-pressed', 'true');
-    expect(stage).toHaveAttribute('data-theme', 'light');
+    expect(page).toHaveAttribute('data-theme', 'light');
   });
 
   it('keeps modal dialog keyboard trapping and closing functional in dark mode', () => {
-    render(<Components />);
+    renderExplore('/explore/components');
     
     // Switch to dark mode
     fireEvent.click(screen.getByRole('button', { name: /dark theme preview/i }));
@@ -98,7 +109,7 @@ describe('Components theme previews', () => {
   });
 
   it('keeps tabs roving tabindex and arrow navigation working in dark mode', () => {
-    render(<Components />);
+    renderExplore('/explore/components');
     
     // Switch to dark mode
     fireEvent.click(screen.getByRole('button', { name: /dark theme preview/i }));
@@ -118,14 +129,14 @@ describe('Components theme previews', () => {
 
 describe('Tokens theme previews', () => {
   it('toggles token cards into dark preview without altering stored token values', () => {
-    render(<Tokens />);
+    renderExplore('/explore/tokens');
 
     const lightToggle = screen.getByRole('button', { name: /light theme preview/i });
     const darkToggle = screen.getByRole('button', { name: /dark theme preview/i });
 
     // Initial state
     expect(lightToggle).toHaveAttribute('aria-pressed', 'true');
-    const container = document.querySelector('[data-theme]');
+    const container = document.querySelector('.explore-page');
     expect(container).toHaveAttribute('data-theme', 'light');
 
     // Check a color input value before toggling
@@ -151,7 +162,7 @@ describe('Tokens theme previews', () => {
   });
 
   it('opens token detail dialog in theme-aware mode', () => {
-    render(<Tokens />);
+    renderExplore('/explore/tokens');
     
     // Switch to dark mode
     fireEvent.click(screen.getByRole('button', { name: /dark theme preview/i }));
@@ -170,13 +181,7 @@ describe('Tokens theme previews', () => {
 
 describe('Foundations resource detail theme previews', () => {
   it('toggles palette detail preview to dark without mutating custom values', () => {
-    render(
-      <MemoryRouter initialEntries={['/explore/foundations/colour/neutral']}>
-        <Routes>
-          <Route path="/explore/foundations/:categoryId/:resourceId" element={<Foundations />} />
-        </Routes>
-      </MemoryRouter>
-    );
+    renderExplore('/explore/foundations/colour/neutral');
 
     expect(screen.getByRole('heading', { name: 'Neutral & Minimal' })).toBeInTheDocument();
 
@@ -185,7 +190,7 @@ describe('Foundations resource detail theme previews', () => {
 
     // Initial theme
     expect(lightToggle).toHaveAttribute('aria-pressed', 'true');
-    const container = document.querySelector('[data-theme]');
+    const container = document.querySelector('.explore-page');
     expect(container).toHaveAttribute('data-theme', 'light');
 
     // Switch to dark mode
@@ -204,12 +209,12 @@ describe('Foundations resource detail theme previews', () => {
 });
 
 describe('Landing page and Docs top navbar theme preview toggle', () => {
-  it('renders theme preview toggle in landing page navbar and toggles playground and page theme', () => {
+  it('renders single theme preview toggle in landing page navbar and toggles playground and page theme', () => {
     render(<App />);
 
-    // Landing page has navbar toggle
+    // Landing page has single navbar toggle (no duplicate in playground)
     const navbarToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
-    expect(navbarToggles.length).toBeGreaterThanOrEqual(1);
+    expect(navbarToggles.length).toBe(1);
 
     const main = document.querySelector('main.landing-page');
     expect(main).toHaveAttribute('data-theme', 'light');
@@ -232,20 +237,20 @@ describe('Landing page and Docs top navbar theme preview toggle', () => {
     expect(playground).toHaveAttribute('data-theme', 'light');
   });
 
-  it('renders theme preview toggle in Docs navbar and updates docs theme', () => {
+  it('renders single theme preview toggle in Docs navbar and updates docs theme', () => {
     render(
       <MemoryRouter initialEntries={['/docs']}>
         <Docs />
       </MemoryRouter>
     );
 
-    const darkToggle = screen.getByRole('button', { name: /dark theme preview/i });
-    expect(darkToggle).toBeInTheDocument();
+    const darkToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
+    expect(darkToggles.length).toBe(1);
 
     const main = document.querySelector('main.docs-page');
     expect(main).toHaveAttribute('data-theme', 'light');
 
-    fireEvent.click(darkToggle);
+    fireEvent.click(darkToggles[0]);
     expect(main).toHaveAttribute('data-theme', 'dark');
 
     const lightToggle = screen.getByRole('button', { name: /light theme preview/i });
@@ -272,31 +277,20 @@ describe('Persistent theme state and visibility across /explore and /studio', ()
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
-  it('keeps theme toggle visible on /explore Overview and adapts workspace styling', () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter initialEntries={['/explore']}>
-          <Routes>
-            <Route path="/explore" element={<DashboardLayout />}>
-              <Route index element={<Overview />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
-      </ThemeProvider>
-    );
+  it('keeps single theme toggle visible on /explore Overview and adapts workspace styling', () => {
+    renderExplore('/explore');
 
-    // Toggle button is visible in top navbar AND inside Overview canvas
+    // Toggle button is visible in top navbar ONLY (no duplicate toggle on Overview)
     const navbarNav = screen.getByRole('navigation', { name: 'Explore Studio navigation' });
     expect(navbarNav).toBeInTheDocument();
-    const overviewToggle = screen.getByRole('group', { name: /overview theme preview toggle/i });
-    expect(overviewToggle).toBeInTheDocument();
+    const darkToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
+    expect(darkToggles.length).toBe(1);
 
     const explorePage = document.querySelector('.explore-page');
     expect(explorePage).toHaveAttribute('data-theme', 'light');
 
-    // Toggle to dark from overview
-    const darkBtn = overviewToggle.querySelector('button[aria-label="Dark theme preview"]');
-    fireEvent.click(darkBtn);
+    // Toggle to dark from navbar
+    fireEvent.click(darkToggles[0]);
 
     expect(explorePage).toHaveAttribute('data-theme', 'dark');
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');

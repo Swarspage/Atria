@@ -8,7 +8,6 @@ import {
   PuzzlePiece,
   Sparkle,
 } from '@phosphor-icons/react';
-import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
 import { useThemePreview } from '../context/ThemeContext.jsx';
 
 const palette = [
@@ -57,14 +56,7 @@ export default function Overview() {
     <div className="workspace-overview" data-theme={previewTheme}>
       <div className="workspace-overview-topline">
         <span className="section-index">[ YOUR WORKSPACE ]</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <ThemePreviewToggle
-            mode={previewTheme}
-            onChange={setPreviewTheme}
-            label="Overview theme preview toggle"
-          />
-          <span className="workspace-live"><span className="live-dot" /> WORKSPACE OVERVIEW</span>
-        </div>
+        <span className="workspace-live"><span className="live-dot" /> WORKSPACE OVERVIEW</span>
       </div>
 
       <section className="workspace-welcome">
