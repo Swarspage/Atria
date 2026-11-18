@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 import Overview from './pages/Overview.jsx'
 import Foundations from './pages/Foundations.jsx'
@@ -7,6 +7,7 @@ import Tokens from './pages/Tokens.jsx'
 import Components from './pages/Components.jsx'
 import Studio from './pages/Studio.jsx'
 import Docs from './Docs.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import ThemePreviewToggle from './components/ThemePreviewToggle.jsx'
 import { ThemeProvider, useThemePreview } from './context/ThemeContext.jsx'
 import {
@@ -63,10 +64,10 @@ function LandingPage() {
           <span>atria<span className="brand-period">.</span></span>
         </a>
         <div className="nav-links">
-          <a href="/studio">Studio</a>
+          <Link to="/studio">Studio</Link>
           <a href="#foundations">Foundation</a>
           <a href="#components">Components</a>
-          <a href="/docs">Docs</a>
+          <Link to="/docs">Docs</Link>
           <a href="#contact">Contact</a>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -89,8 +90,8 @@ function LandingPage() {
             A thoughtful space to create, organise, and document design systems — bringing design decisions and development closer together.
           </p>
           <div className="hero-actions">
-            <a className="button button-dark" href="/explore">Explore library <ArrowRight size={16} /></a>
-            <a className="text-link" href="/studio">Open studio <ArrowUpRight size={15} /></a>
+            <Link className="button button-dark" to="/explore">Explore library <ArrowRight size={16} /></Link>
+            <Link className="text-link" to="/studio">Open studio <ArrowUpRight size={15} /></Link>
           </div>
           <div className="hero-footnote"><span className="mono">01 / 04</span><span>DESIGNED FOR TEAMS THAT CARE ABOUT THE DETAILS</span></div>
         </div>
@@ -307,7 +308,7 @@ function LandingPage() {
 
       <footer className="footer shell">
         <div className="footer-top"><a className="brand" href="#"><span className="brand-mark"><span /><span /><span /><span /></span><span>atria<span className="brand-period">.</span></span></a><p>A more considered way to build<br />and maintain design systems.</p><a className="footer-github" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer"><GithubLogo size={18} /> Star the project <ArrowUpRight size={14} /></a></div>
-        <div className="footer-bottom"><span>© 2026 ATRIA STUDIO</span><span>OPEN SOURCE · EARLY DEVELOPMENT</span><a href="/docs">DOCUMENTATION</a><a href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">GITHUB <ArrowUpRight size={12} /></a></div>
+        <div className="footer-bottom"><span>© 2026 ATRIA STUDIO</span><span>OPEN SOURCE · EARLY DEVELOPMENT</span><Link to="/docs">DOCUMENTATION</Link><a href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">GITHUB <ArrowUpRight size={12} /></a></div>
       </footer>
     </main>
   )
@@ -316,21 +317,23 @@ function LandingPage() {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/explore" element={<DashboardLayout />}>
-            <Route index element={<Overview />} />
-            <Route path="foundations" element={<Foundations />} />
-            <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
-            <Route path="tokens" element={<Tokens />} />
-            <Route path="components" element={<Components />} />
-          </Route>
-          <Route path="/studio" element={<Studio />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/explore" element={<DashboardLayout />}>
+              <Route index element={<Overview />} />
+              <Route path="foundations" element={<Foundations />} />
+              <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
+              <Route path="tokens" element={<Tokens />} />
+              <Route path="components" element={<Components />} />
+            </Route>
+            <Route path="/studio" element={<Studio />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ErrorBoundary>
     </ThemeProvider>
   )
 }
