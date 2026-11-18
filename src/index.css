@@ -580,6 +580,22 @@ h2 { font-size: clamp(38px, 5vw, 57px); line-height: 1.05; letter-spacing: -.07e
   background: #ffffff;
 }
 
+.landing-page[data-theme="dark"] .text-link,
+.docs-page[data-theme="dark"] .text-link,
+.explore-page[data-theme="dark"] .text-link,
+[data-theme="dark"] .text-link {
+  color: #f4f3ef;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.landing-page[data-theme="dark"] .text-link:hover,
+.docs-page[data-theme="dark"] .text-link:hover,
+.explore-page[data-theme="dark"] .text-link:hover,
+[data-theme="dark"] .text-link:hover {
+  color: #ffffff !important;
+  opacity: 0.9;
+}
+
 .landing-page[data-theme="dark"] .hero-art {
   background: #1c1c1f;
   border-color: #2e2e34;
