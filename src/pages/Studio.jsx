@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Check, Code, Copy, Download, FloppyDisk, Palette, Plus, SquaresFour, Stack, Trash, X } from '@phosphor-icons/react';
 import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
@@ -63,9 +63,28 @@ export default function Studio() {
  const [exportOpen,setExportOpen]=useState(false);
  const [copied,setCopied]=useState(false);
  const [saved,setSaved]=useState(false);
+ const [mobileView,setMobileView]=useState('canvas');
+ const inspectorToggle=useRef(null);
+ const exportDialog=useRef(null);
+ useEffect(()=>{
+  if(!exportOpen)return;
+  const previous=document.activeElement;
+  const dialog=exportDialog.current;
+  const buttons=()=>[...dialog.querySelectorAll('button')];
+  buttons()[0]?.focus();
+  const onKeyDown=event=>{
+   if(event.key==='Escape'){event.preventDefault();setExportOpen(false);}
+   if(event.key!=='Tab')return;
+   const controls=buttons(),first=controls[0],last=controls.at(-1);
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+  };
+  dialog.addEventListener('keydown',onKeyDown);
+  return ()=>{dialog.removeEventListener('keydown',onKeyDown);previous?.focus();};
+ },[exportOpen]);
  const selected=items.find(x=>x.id===selectedId)||items[0];
  const patch=values=>setItems(old=>old.map(x=>x.id===selectedId?{...x,...values}:x));
- const add=type=>{const x=makeItem(type,items.length);setItems(old=>[...old,x]);setSelectedId(x.id);setPanel('Layers');};
+ const add=type=>{const x=makeItem(type,items.length);setItems(old=>[...old,x]);setSelectedId(x.id);setPanel('Layers');setMobileView('canvas');};
  const remove=id=>{const next=items.filter(x=>x.id!==id);setItems(next);if(selectedId===id)setSelectedId(next[0]?.id||'');};
  const save=()=>{localStorage.setItem('atria:builder:elements',JSON.stringify(items));localStorage.setItem('atria:builder:tokens',JSON.stringify(tokens));localStorage.setItem('atria:builder:name',JSON.stringify(name));setSaved(true);window.setTimeout(()=>setSaved(false),1400);};
  const apply=p=>{if(selected)patch({bg:p.colors[4],color:p.colors[0],border:p.colors[2]});setTokens(old=>old.map(t=>t.name==='color.brand.primary'?{...t,value:p.colors[1]}:t));};
@@ -94,9 +113,14 @@ export default function Studio() {
      <button className="dark" onClick={()=>setExportOpen(true)}><Code size={14}/> Export</button>
    </div>
   </header>
-  <div className="builder-grid">
-   <aside className="builder-left">
-    <nav className="builder-tabs">{panels.map(([id,icon])=><button key={id} className={panel===id?'active':''} onClick={()=>setPanel(id)}>{icon}<span>{id}</span></button>)}</nav>
+  <nav className="builder-mobile-nav" aria-label="Studio panels">
+   <button type="button" aria-pressed={mobileView==='library'} aria-controls="builder-library" onClick={()=>setMobileView('library')}>Library</button>
+   <button type="button" aria-pressed={mobileView==='canvas'} aria-controls="builder-canvas" onClick={()=>setMobileView('canvas')}>Canvas</button>
+   <button type="button" ref={inspectorToggle} aria-pressed={mobileView==='inspector'} aria-controls="builder-inspector" onClick={()=>setMobileView('inspector')}>Inspector</button>
+  </nav>
+  <div className="builder-grid" data-mobile-view={mobileView}>
+   <aside className="builder-left" id="builder-library" aria-label="Component library tools">
+    <nav className="builder-tabs" aria-label="Library tools">{panels.map(([id,icon])=><button key={id} aria-pressed={panel===id} className={panel===id?'active':''} onClick={()=>setPanel(id)}>{icon}<span>{id}</span></button>)}</nav>
     <div className="builder-left-content">
      {panel==='Add'&&<><div className="builder-label">COMPONENT LIBRARY <small>{types.length} COMPONENTS</small></div>{types.map(type=><button className="builder-add-item" key={type} draggable onDragStart={e=>e.dataTransfer.setData('atria-component',type)} onClick={()=>add(type)}><span>{type.slice(0,1)}</span><b>{type}</b><Plus size={13}/></button>)}</>}
      {panel==='Layers'&&<><div className="builder-label">LAYERS <small>{items.length} ITEMS</small></div>{items.map((x,i)=><div className={'builder-layer '+(selectedId===x.id?'selected':'')} key={x.id}><button onClick={()=>setSelectedId(x.id)}><small>{String(i+1).padStart(2,'0')}</small><span><b>{x.name}</b><em>{x.type}</em></span></button><button className="icon-only" aria-label={'Delete '+x.name} onClick={()=>remove(x.id)}><Trash size={13}/></button></div>)}<button className="builder-add-inline" onClick={()=>setPanel('Add')}><Plus size={13}/> Add component</button></>}
@@ -104,7 +128,7 @@ export default function Studio() {
      {panel==='Palettes'&&<><div className="builder-label">COLOR PALETTES <small>{paletteSets.length} SETS</small></div>{paletteSets.map(p=><button className="builder-palette" key={p.name} onClick={()=>apply(p)}><span>{p.colors.map(c=><i key={c} style={{background:c}}/>)}</span><b>{p.name}</b><small>Apply to selection</small></button>)}</>}
     </div>
    </aside>
-   <main className="builder-main">
+   <main className="builder-main" id="builder-canvas" aria-label="Canvas">
     <div className="builder-canvas-head"><span>CANVAS <b>{items.length} COMPONENTS</b></span><small>LIVE PREVIEW · 100%</small></div>
     <div className="builder-canvas-scroll" onDragOver={e=>e.preventDefault()} onDrop={onDrop}><div className="builder-artboard"><div className="builder-artboard-head"><b>{name||'Untitled design system'}</b><small>COMPONENT PLAYGROUND</small></div>
      {items.length?<div className="builder-canvas-items">{items.map(x=><div className="builder-canvas-item" key={x.id}><button className={selectedId===x.id?'active':''} onClick={()=>setSelectedId(x.id)}>{x.name}</button><Preview item={x} active={selectedId===x.id} onSelect={()=>setSelectedId(x.id)}/></div>)}</div>:<div className="builder-empty-canvas"><SquaresFour size={28}/><b>Your canvas is empty</b><span>Choose a component or drag one here.</span></div>}
@@ -112,7 +136,7 @@ export default function Studio() {
     </div></div>
     <div className="builder-main-foot"><span>LOCAL WORKSPACE</span><span>Save to keep your work in this browser</span></div>
    </main>
-   <aside className="builder-right"><div className="builder-inspector-head"><span>INSPECTOR</span><b>{selected?.name||'No selection'}</b></div>
+   <aside className="builder-right" id="builder-inspector" aria-label="Inspector"><div className="builder-inspector-head"><span>INSPECTOR</span><b>{selected?.name||'No selection'}</b><button className="builder-inspector-dismiss" type="button" aria-label="Return to canvas" onClick={()=>{setMobileView('canvas');inspectorToggle.current?.focus();}}>Close <X size={14}/></button></div>
     {selected?<div className="builder-inspector-content">
      <section><h3>CONTENT</h3><label>Layer name<input value={selected.name} onChange={e=>patch({name:e.target.value})}/></label><label>Text / label<input value={selected.text} onChange={e=>patch({text:e.target.value})}/></label></section>
      <section><h3>APPEARANCE</h3>{[['Background','bg'],['Text','color'],['Border','border']].map(([label,key])=><label className="builder-color-field" key={key}>{label}<span><input type="color" value={selected[key]} onChange={e=>patch({[key]:e.target.value})}/><input value={selected[key]} onChange={e=>patch({[key]:e.target.value})}/></span></label>)}
@@ -121,6 +145,6 @@ export default function Studio() {
     </div>:<p className="builder-no-selection">Select an element on the canvas or add a component.</p>}
    </aside>
   </div>
-  {exportOpen&&<div className="builder-modal-bg" onClick={()=>setExportOpen(false)}><section className="builder-modal" onClick={e=>e.stopPropagation()}><header><div><small>DEVELOPER HANDOFF</small><h2>Export your system</h2></div><button onClick={()=>setExportOpen(false)} aria-label="Close"><X size={17}/></button></header><nav>{['React','CSS','HTML','Tokens'].map(x=><button className={format===x?'active':''} key={x} onClick={()=>setFormat(x)}>{x}</button>)}</nav><pre>{output}</pre><footer><button onClick={copy}>{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':'Copy code'}</button><button onClick={download}><Download size={14}/> Download</button></footer></section></div>}
+  {exportOpen&&<div className="builder-modal-bg" onClick={()=>setExportOpen(false)}><section className="builder-modal" role="dialog" aria-modal="true" aria-labelledby="builder-export-title" ref={exportDialog} onClick={e=>e.stopPropagation()}><header><div><small>DEVELOPER HANDOFF</small><h2 id="builder-export-title">Export your system</h2></div><button onClick={()=>setExportOpen(false)} aria-label="Close export"><X size={17}/></button></header><nav>{['React','CSS','HTML','Tokens'].map(x=><button className={format===x?'active':''} key={x} onClick={()=>setFormat(x)}>{x}</button>)}</nav><pre>{output}</pre><footer><button onClick={copy}>{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':'Copy code'}</button><button onClick={download}><Download size={14}/> Download</button></footer></section></div>}
  </div>;
 }
