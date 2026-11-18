@@ -4,13 +4,14 @@ import {Plus,Copy,Download,Trash,MagnifyingGlass,Check} from '@phosphor-icons/re
 import {useStudioData} from '../data/studioStore.js';
 import {parseTokenImport,rowsToTokens} from '../data/tokenImport.js';
 import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
+import { useThemePreview } from '../context/ThemeContext.jsx';
 
 const control={minWidth:0,padding:'9px 10px',border:'1px solid var(--line)',background:'#fff',color:'var(--ink)',font:'inherit',fontSize:11};
 const action={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid var(--ink)',background:'#242420',color:'#fff',fontSize:10,cursor:'pointer'};
 function CopyValue({value,color}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:color||'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
 export default function Tokens(){
  const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);const [importText,setImportText]=useState('');const [review,setReview]=useState(null);
- const outlet=useOutletContext();const [localTheme,setLocalTheme]=useState('light');const previewTheme=outlet?.previewTheme??localTheme;const setPreviewTheme=outlet?.setPreviewTheme??setLocalTheme;
+ const outlet=useOutletContext();const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext.previewTheme;const setPreviewTheme=outlet?.setPreviewTheme??themeContext.setPreviewTheme;
  const [draft,setDraft]=useState({name:'',value:'',type:'color',description:'',group:'Primitive'});
  const isDark = previewTheme === 'dark';
 

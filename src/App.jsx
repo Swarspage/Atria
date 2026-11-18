@@ -6,7 +6,9 @@ import Foundations from './pages/Foundations.jsx'
 import Tokens from './pages/Tokens.jsx'
 import Components from './pages/Components.jsx'
 import Studio from './pages/Studio.jsx'
+import Docs from './Docs.jsx'
 import ThemePreviewToggle from './components/ThemePreviewToggle.jsx'
+import { ThemeProvider, useThemePreview } from './context/ThemeContext.jsx'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -41,8 +43,7 @@ const swatches = ['#171717', '#55534F', '#99958D', '#D5D1C8', '#EEECE7']
 function LandingPage() {
   const [activeTab, setActiveTab] = useState('Button')
   const [copied, setCopied] = useState(false)
-  const [previewTheme, setPreviewTheme] = useState('light')
-  const isDark = previewTheme === 'dark'
+  const { previewTheme, setPreviewTheme, isDark } = useThemePreview()
 
   const copyToken = async () => {
     try {
@@ -319,20 +320,23 @@ function LandingPage() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/explore" element={<DashboardLayout />}>
-          <Route index element={<Overview />} />
-          <Route path="foundations" element={<Foundations />} />
-          <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
-          <Route path="tokens" element={<Tokens />} />
-          <Route path="components" element={<Components />} />
-        </Route>
-        <Route path="/studio" element={<Studio />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/explore" element={<DashboardLayout />}>
+            <Route index element={<Overview />} />
+            <Route path="foundations" element={<Foundations />} />
+            <Route path="foundations/:categoryId/:resourceId" element={<Foundations />} />
+            <Route path="tokens" element={<Tokens />} />
+            <Route path="components" element={<Components />} />
+          </Route>
+          <Route path="/studio" element={<Studio />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

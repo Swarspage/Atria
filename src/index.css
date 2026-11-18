@@ -783,3 +783,175 @@ h2 { font-size: clamp(38px, 5vw, 57px); line-height: 1.05; letter-spacing: -.07e
   color: #a1a1aa;
 }
 
+/* Explore Studio Dark Mode */
+.explore-page[data-theme="dark"] {
+  background: #121214;
+  color: #f4f3ef;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.explore-page[data-theme="dark"] .explore-header {
+  background: #121214;
+}
+
+.explore-page[data-theme="dark"] .explore-top-nav {
+  border-bottom-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .brand-mark span {
+  background: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .brand-period {
+  color: #71717a;
+}
+
+.explore-page[data-theme="dark"] .nav-cta {
+  border-color: #38383e;
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .nav-cta:hover {
+  background: #27272a;
+  border-color: #52525b;
+}
+
+.explore-page[data-theme="dark"] .explore-sidebar {
+  border-right-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .explore-sidebar-label {
+  color: #71717a;
+}
+
+.explore-page[data-theme="dark"] .explore-section-link {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .explore-section-link:hover {
+  color: #ffffff;
+  background: #27272a;
+}
+
+.explore-page[data-theme="dark"] .explore-section-link.active {
+  color: #ffffff;
+  background: #27272a;
+  border-color: #38383e;
+}
+
+.explore-page[data-theme="dark"] .explore-section-icon {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .explore-section-link.active .explore-section-icon {
+  color: #ffffff;
+}
+
+.explore-page[data-theme="dark"] .explore-section-link small {
+  color: #71717a;
+}
+
+.explore-page[data-theme="dark"] .explore-footer {
+  border-top-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .explore-footer .footer-bottom {
+  border-top-color: #27272a;
+  color: #71717a;
+}
+
+.explore-page[data-theme="dark"] .explore-footer .footer-top p {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .explore-footer .footer-github {
+  color: #f4f3ef;
+}
+
+/* Explore Overview Dark Mode */
+.explore-page[data-theme="dark"] .workspace-overview-topline {
+  border-bottom-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .workspace-welcome h1 {
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .workspace-welcome p {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .workspace-welcome-note {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .workspace-metrics {
+  border-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .workspace-metrics article {
+  border-right-color: #27272a;
+  background: #18181b;
+}
+
+.explore-page[data-theme="dark"] .workspace-metrics article span,
+.explore-page[data-theme="dark"] .workspace-metrics article small {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .workspace-metrics article strong {
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .workspace-palette {
+  border-color: #27272a;
+  background: #18181b;
+}
+
+.explore-page[data-theme="dark"] .workspace-palette h2,
+.explore-page[data-theme="dark"] .workspace-modules h2 {
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .workspace-swatch {
+  border-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .workspace-swatch span {
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .workspace-swatch code {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .workspace-module {
+  background: #18181b;
+  border-color: #27272a;
+}
+
+.explore-page[data-theme="dark"] .workspace-module:hover {
+  background: #242428;
+  border-color: #38383e;
+}
+
+.explore-page[data-theme="dark"] .workspace-module-copy strong {
+  color: #f4f3ef;
+}
+
+.explore-page[data-theme="dark"] .workspace-module-copy span {
+  color: #a1a1aa;
+}
+
+.explore-page[data-theme="dark"] .workspace-overview-foot {
+  border-top-color: #27272a;
+  color: #71717a;
+}
+
+/* Also support root html[data-theme="dark"] */
+html[data-theme="dark"] body {
+  background: #121214;
+  color: #f4f3ef;
+}
+
+

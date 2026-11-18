@@ -9,6 +9,7 @@ import {
   Sparkle,
 } from '@phosphor-icons/react';
 import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
+import { useThemePreview } from '../context/ThemeContext.jsx';
 
 const sections = [
   { name: 'Studio', path: '/studio', icon: <Sparkle size={17} weight="regular" />, number: '04' },
@@ -49,10 +50,10 @@ function ExploreFooter() {
 }
 
 export default function DashboardLayout() {
-  const [previewTheme, setPreviewTheme] = useState('light');
+  const { previewTheme, setPreviewTheme, isDark } = useThemePreview();
 
   return (
-    <div className="explore-page">
+    <div className="explore-page" data-theme={previewTheme}>
       <header className="explore-header">
         <nav className="nav shell explore-top-nav" aria-label="Explore Studio navigation">
           <a className="brand" href="/" aria-label="Atria home">
@@ -91,7 +92,7 @@ export default function DashboardLayout() {
         </aside>
 
         <main className="explore-content">
-          <Outlet context={{ previewTheme, setPreviewTheme }} />
+          <Outlet context={{ previewTheme, setPreviewTheme, isDark }} />
         </main>
       </div>
 

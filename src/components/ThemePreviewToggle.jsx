@@ -16,11 +16,12 @@ export default function ThemePreviewToggle({
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        border: '1px solid var(--line)',
+        border: isDark ? '1px solid #38383e' : '1px solid var(--line, #deddd8)',
         borderRadius: 4,
-        background: '#fff',
+        background: isDark ? '#1c1c1f' : '#ffffff',
         padding: 2,
         gap: 2,
+        transition: 'background 0.2s ease, border-color 0.2s ease',
       }}
     >
       <button
@@ -35,8 +36,8 @@ export default function ThemePreviewToggle({
           padding: '5px 9px',
           border: 0,
           borderRadius: 3,
-          background: isLight ? '#242420' : 'transparent',
-          color: isLight ? '#fff' : '#6f6d67',
+          background: isLight ? (isDark ? '#2e2e34' : '#242420') : 'transparent',
+          color: isLight ? '#ffffff' : (isDark ? '#a1a1aa' : '#6f6d67'),
           fontSize: 10,
           fontWeight: 600,
           cursor: 'pointer',
@@ -61,8 +62,8 @@ export default function ThemePreviewToggle({
           padding: '5px 9px',
           border: 0,
           borderRadius: 3,
-          background: isDark ? '#242420' : 'transparent',
-          color: isDark ? '#fff' : '#6f6d67',
+          background: isDark ? '#ffffff' : 'transparent',
+          color: isDark ? '#141416' : '#6f6d67',
           fontSize: 10,
           fontWeight: 600,
           cursor: 'pointer',
@@ -77,4 +78,3 @@ export default function ThemePreviewToggle({
     </div>
   );
 }
-

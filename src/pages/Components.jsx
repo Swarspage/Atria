@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {Copy,Check,ArrowUpRight,X,CaretDown} from '@phosphor-icons/react';
 import ThemePreviewToggle from '../components/ThemePreviewToggle.jsx';
+import { useThemePreview } from '../context/ThemeContext.jsx';
 
 const library=[
 {id:'button',name:'Button',category:'Actions',description:'A reusable action for forms, dialogs and page flows.',variants:['Primary','Secondary','Ghost'],code:'export function Button({ children, variant = "primary", disabled = false, ...props }) {\n  return <button className={"button button--" + variant} disabled={disabled} {...props}>{children}</button>;\n}',css:'.button { display:inline-flex; align-items:center; justify-content:center; padding:10px 16px; border:1px solid #242420; border-radius:6px; font:600 14px/1.2 system-ui,sans-serif; cursor:pointer; }\n.button--primary { background:#242420; color:#fff; }\n.button--secondary { background:#fff; color:#242420; }\n.button--ghost { background:transparent; border-color:transparent; color:#242420; }\n.button:disabled { opacity:.45; cursor:not-allowed; }'},
@@ -18,7 +19,7 @@ const library=[
 const btn={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid var(--line)',background:'#fff',color:'var(--ink)',fontSize:10,cursor:'pointer'};
 function CopyButton({value,label}){const [copied,setCopied]=useState(false);return <button style={btn} onClick={async()=>{try{await navigator.clipboard.writeText(value);setCopied(true);setTimeout(()=>setCopied(false),1300)}catch{}}}>{copied?<Check size={13}/>:<Copy size={13}/>} {copied?'Copied':label||'Copy code'}</button>}
 export default function Components(){
- const [active,setActive]=useState('button');const [variant,setVariant]=useState('Primary');const [tab,setTab]=useState('React');const [buttonText,setButtonText]=useState('Get started');const [inputValue,setInputValue]=useState('hello@example.com');const [dialogOpen,setDialogOpen]=useState(false);const [selectedTab,setSelectedTab]=useState('Overview');const [selectedOption,setSelectedOption]=useState('Design');const [checked,setChecked]=useState(false);const [selected,setSelected]=useState([]);const outlet=useOutletContext();const [localTheme,setLocalTheme]=useState('light');const previewTheme=outlet?.previewTheme??localTheme;const setPreviewTheme=outlet?.setPreviewTheme??setLocalTheme;const dialogRef=useRef(null);const dialogTrigger=useRef(null);
+ const [active,setActive]=useState('button');const [variant,setVariant]=useState('Primary');const [tab,setTab]=useState('React');const [buttonText,setButtonText]=useState('Get started');const [inputValue,setInputValue]=useState('hello@example.com');const [dialogOpen,setDialogOpen]=useState(false);const [selectedTab,setSelectedTab]=useState('Overview');const [selectedOption,setSelectedOption]=useState('Design');const [checked,setChecked]=useState(false);const [selected,setSelected]=useState([]);const outlet=useOutletContext();const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext.previewTheme;const setPreviewTheme=outlet?.setPreviewTheme??themeContext.setPreviewTheme;const dialogRef=useRef(null);const dialogTrigger=useRef(null);
  const tabNames=['Overview','Activity','Settings'];
  const isDark = previewTheme === 'dark';
 

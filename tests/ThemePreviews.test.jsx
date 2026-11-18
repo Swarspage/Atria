@@ -6,8 +6,11 @@ import Components from '../src/pages/Components.jsx';
 import Tokens from '../src/pages/Tokens.jsx';
 import Foundations from '../src/pages/Foundations.jsx';
 import DashboardLayout from '../src/layouts/DashboardLayout.jsx';
+import Overview from '../src/pages/Overview.jsx';
+import Studio from '../src/pages/Studio.jsx';
 import App from '../src/App.jsx';
 import Docs from '../src/Docs.jsx';
+import { ThemeProvider, THEME_STORAGE_KEY } from '../src/context/ThemeContext.jsx';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -15,6 +18,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.documentElement.removeAttribute('data-theme');
 });
 
 describe('DashboardLayout top navbar theme preview toggle', () => {
@@ -247,5 +251,89 @@ describe('Landing page and Docs top navbar theme preview toggle', () => {
     const lightToggle = screen.getByRole('button', { name: /light theme preview/i });
     fireEvent.click(lightToggle);
     expect(main).toHaveAttribute('data-theme', 'light');
+  });
+});
+
+describe('Persistent theme state and visibility across /explore and /studio', () => {
+  it('persists selected theme in localStorage and initializes from stored value on mount', () => {
+    // 1. Initial render defaults to light
+    const { unmount } = render(<App />);
+    const darkToggle = screen.getAllByRole('button', { name: /dark theme preview/i })[0];
+    fireEvent.click(darkToggle);
+
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    unmount();
+
+    // 2. Remount initializes with dark from localStorage
+    render(<App />);
+    const main = document.querySelector('main.landing-page');
+    expect(main).toHaveAttribute('data-theme', 'dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('keeps theme toggle visible on /explore Overview and adapts workspace styling', () => {
+    render(
+      <ThemeProvider>
+        <MemoryRouter initialEntries={['/explore']}>
+          <Routes>
+            <Route path="/explore" element={<DashboardLayout />}>
+              <Route index element={<Overview />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
+    );
+
+    // Toggle button is visible in top navbar AND inside Overview canvas
+    const navbarNav = screen.getByRole('navigation', { name: 'Explore Studio navigation' });
+    expect(navbarNav).toBeInTheDocument();
+    const overviewToggle = screen.getByRole('group', { name: /overview theme preview toggle/i });
+    expect(overviewToggle).toBeInTheDocument();
+
+    const explorePage = document.querySelector('.explore-page');
+    expect(explorePage).toHaveAttribute('data-theme', 'light');
+
+    // Toggle to dark from overview
+    const darkBtn = overviewToggle.querySelector('button[aria-label="Dark theme preview"]');
+    fireEvent.click(darkBtn);
+
+    expect(explorePage).toHaveAttribute('data-theme', 'dark');
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+
+    // Swatches receive dual contrast rim
+    const swatch = document.querySelector('.workspace-swatch-colour');
+    expect(swatch.style.boxShadow).toMatch(/rgba\(255,\s*255,\s*255/);
+  });
+
+  it('renders theme preview toggle in /studio builder topbar and updates studio canvas theme', () => {
+    render(
+      <ThemeProvider>
+        <MemoryRouter initialEntries={['/studio']}>
+          <Studio />
+        </MemoryRouter>
+      </ThemeProvider>
+    );
+
+    // Studio builder has toggle in topbar
+    const studioToggle = screen.getByRole('group', { name: /studio theme preview toggle/i });
+    expect(studioToggle).toBeInTheDocument();
+
+    const builder = document.querySelector('.atria-builder');
+    expect(builder).toHaveAttribute('data-theme', 'light');
+
+    // Click dark toggle in studio
+    const darkBtn = studioToggle.querySelector('button[aria-label="Dark theme preview"]');
+    fireEvent.click(darkBtn);
+
+    expect(builder).toHaveAttribute('data-theme', 'dark');
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+
+    // Click light toggle in studio
+    const lightBtn = studioToggle.querySelector('button[aria-label="Light theme preview"]');
+    fireEvent.click(lightBtn);
+
+    expect(builder).toHaveAttribute('data-theme', 'light');
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('light');
   });
 });

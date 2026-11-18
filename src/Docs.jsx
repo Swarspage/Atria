@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ThemePreviewToggle from './components/ThemePreviewToggle.jsx'
+import { useThemePreview } from './context/ThemeContext.jsx'
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -41,8 +42,7 @@ const groups = [
 ]
 
 function Docs() {
-  const [previewTheme, setPreviewTheme] = useState('light')
-  const isDark = previewTheme === 'dark'
+  const { previewTheme, setPreviewTheme, isDark } = useThemePreview()
 
   return (
     <main className="docs-page" data-theme={previewTheme}>
