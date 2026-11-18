@@ -6,6 +6,7 @@ import Foundations from './pages/Foundations.jsx'
 import Tokens from './pages/Tokens.jsx'
 import Components from './pages/Components.jsx'
 import Studio from './pages/Studio.jsx'
+import ThemePreviewToggle from './components/ThemePreviewToggle.jsx'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -40,6 +41,8 @@ const swatches = ['#171717', '#55534F', '#99958D', '#D5D1C8', '#EEECE7']
 function LandingPage() {
   const [activeTab, setActiveTab] = useState('Button')
   const [copied, setCopied] = useState(false)
+  const [previewTheme, setPreviewTheme] = useState('light')
+  const isDark = previewTheme === 'dark'
 
   const copyToken = async () => {
     try {
@@ -52,7 +55,7 @@ function LandingPage() {
   }
 
   return (
-    <main>
+    <main className="landing-page" data-theme={previewTheme}>
       <nav className="nav shell">
         <a className="brand" href="#" aria-label="Atria home">
           <span className="brand-mark"><span /><span /><span /><span /></span>
@@ -65,9 +68,16 @@ function LandingPage() {
           <a href="/docs">Docs</a>
           <a href="#contact">Contact</a>
         </div>
-        <a className="nav-cta" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">
-          <GithubLogo size={17} weight="regular" /> View on GitHub <ArrowUpRight size={14} />
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <ThemePreviewToggle
+            mode={previewTheme}
+            onChange={setPreviewTheme}
+            label="Navbar theme preview toggle"
+          />
+          <a className="nav-cta" href="https://github.com/breeze-sn/Atria" target="_blank" rel="noreferrer">
+            <GithubLogo size={17} weight="regular" /> View on GitHub <ArrowUpRight size={14} />
+          </a>
+        </div>
       </nav>
 
       <section className="hero shell">
@@ -105,7 +115,19 @@ function LandingPage() {
               </div>
               <div className="art-palette">
                 <div className="palette-heading"><span>COLOUR PALETTE</span><span>NEUTRAL / 01</span></div>
-                <div className="swatches">{swatches.map((color) => <span key={color} style={{ background: color }} />)}</div>
+                <div className="swatches">
+                  {swatches.map((color) => (
+                    <span
+                      key={color}
+                      style={{
+                        background: color,
+                        boxShadow: isDark
+                          ? '0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 0 1px rgba(0, 0, 0, 0.45)'
+                          : '0 0 0 1px rgba(0, 0, 0, 0.08) inset',
+                      }}
+                    />
+                  ))}
+                </div>
                 <div className="palette-values"><span>INK</span><span>STONE</span><span>ASH</span><span>MIST</span><span>PAPER</span></div>
               </div>
               <div className="art-bottom"><span><Sparkle size={13} /> A system in progress</span><span>VIEW DETAILS <ArrowUpRight size={12} /></span></div>
@@ -155,15 +177,113 @@ function LandingPage() {
         <div className="section-index">[ 03 — THE COMPONENT LIBRARY ]</div>
         <div className="component-layout">
           <div className="component-copy"><h2>From design<br />to <em>real use.</em></h2><p>Explore component anatomy, states, and usage guidance in a space made for both designers and developers.</p><div className="component-note"><Code size={17} /> ONE LANGUAGE. TWO DISCIPLINES.</div></div>
-          <div className="component-preview">
-            <div className="preview-top"><span>COMPONENT PLAYGROUND</span><span>INTERACTIVE PREVIEW <span className="live-dot" /></span></div>
-            <div className="preview-tabs">{['Button', 'Input', 'Badge'].map(tab => <button key={tab} className={activeTab === tab ? 'selected' : ''} onClick={() => setActiveTab(tab)}>{tab}</button>)}</div>
-            <div className="preview-stage">
-              {activeTab === 'Button' && <><button className="sample-button">Get started <ArrowRight size={15} /></button><button className="sample-secondary">Learn more</button></>}
-              {activeTab === 'Input' && <label className="sample-input">Email address<input type="email" placeholder="you@example.com" /></label>}
-              {activeTab === 'Badge' && <><span className="sample-badge"><span className="live-dot" /> Stable</span><span className="sample-badge muted">In progress</span></>}
+          <div
+            className="component-preview"
+            data-theme={previewTheme}
+            style={isDark ? {
+              background: '#161618',
+              border: '1px solid #2e2e34',
+              color: '#f4f3ef',
+              transition: 'background 0.2s ease, border-color 0.2s ease, color 0.2s ease'
+            } : { transition: 'background 0.2s ease, border-color 0.2s ease, color 0.2s ease' }}
+          >
+            <div className="preview-top">
+              <span>COMPONENT PLAYGROUND</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <ThemePreviewToggle
+                  mode={previewTheme}
+                  onChange={setPreviewTheme}
+                  label="Playground theme toggle"
+                />
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: isDark ? '#a1a1aa' : '#85837d' }}>
+                  {previewTheme.toUpperCase()} PREVIEW <span className="live-dot" />
+                </span>
+              </div>
             </div>
-            <div className="preview-footer"><span>DEFAULT STATE / {activeTab.toUpperCase()}</span><span>PREVIEW ONLY</span></div>
+            <div className="preview-tabs" style={isDark ? { borderBottomColor: '#2e2e34' } : {}}>
+              {['Button', 'Input', 'Badge'].map(tab => (
+                <button
+                  key={tab}
+                  className={activeTab === tab ? 'selected' : ''}
+                  onClick={() => setActiveTab(tab)}
+                  style={isDark ? {
+                    color: activeTab === tab ? '#ffffff' : '#a1a1aa',
+                    borderColor: activeTab === tab ? '#ffffff' : 'transparent',
+                  } : {}}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            <div
+              className="preview-stage"
+              style={isDark ? {
+                background: '#101012',
+                border: '1px solid #232328',
+                borderRadius: 4,
+                margin: '14px 0',
+                padding: 20
+              } : {}}
+            >
+              {activeTab === 'Button' && (
+                <>
+                  <button
+                    className="sample-button"
+                    style={isDark ? { background: '#ffffff', color: '#161618', border: '1px solid #ffffff' } : {}}
+                  >
+                    Get started <ArrowRight size={15} />
+                  </button>
+                  <button
+                    className="sample-secondary"
+                    style={isDark ? { background: '#242428', color: '#f4f3ef', border: '1px solid #38383e' } : {}}
+                  >
+                    Learn more
+                  </button>
+                </>
+              )}
+              {activeTab === 'Input' && (
+                <label className="sample-input" style={isDark ? { color: '#d4d4d8' } : {}}>
+                  Email address
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    style={isDark ? {
+                      background: '#1c1c20',
+                      color: '#f4f3ef',
+                      border: '1px solid #38383e'
+                    } : {}}
+                  />
+                </label>
+              )}
+              {activeTab === 'Badge' && (
+                <>
+                  <span
+                    className="sample-badge"
+                    style={isDark ? {
+                      background: 'rgba(34, 197, 94, 0.16)',
+                      border: '1px solid rgba(74, 222, 128, 0.4)',
+                      color: '#4ade80'
+                    } : {}}
+                  >
+                    <span className="live-dot" /> Stable
+                  </span>
+                  <span
+                    className="sample-badge muted"
+                    style={isDark ? {
+                      background: '#242428',
+                      border: '1px solid #38383e',
+                      color: '#d4d4d8'
+                    } : {}}
+                  >
+                    In progress
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="preview-footer" style={isDark ? { borderTopColor: '#2e2e34', color: '#a1a1aa' } : {}}>
+              <span>DEFAULT STATE / {activeTab.toUpperCase()}</span>
+              <span>PREVIEW ONLY ({previewTheme.toUpperCase()} MODE)</span>
+            </div>
           </div>
         </div>
       </section>

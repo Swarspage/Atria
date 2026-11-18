@@ -6,6 +6,8 @@ import Components from '../src/pages/Components.jsx';
 import Tokens from '../src/pages/Tokens.jsx';
 import Foundations from '../src/pages/Foundations.jsx';
 import DashboardLayout from '../src/layouts/DashboardLayout.jsx';
+import App from '../src/App.jsx';
+import Docs from '../src/Docs.jsx';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -194,5 +196,56 @@ describe('Foundations resource detail theme previews', () => {
     fireEvent.click(lightToggle);
     expect(container).toHaveAttribute('data-theme', 'light');
     expect(swatches[0].style.boxShadow).toMatch(/rgba\(0,\s*0,\s*0/);
+  });
+});
+
+describe('Landing page and Docs top navbar theme preview toggle', () => {
+  it('renders theme preview toggle in landing page navbar and toggles playground and page theme', () => {
+    render(<App />);
+
+    // Landing page has navbar toggle
+    const navbarToggles = screen.getAllByRole('button', { name: /dark theme preview/i });
+    expect(navbarToggles.length).toBeGreaterThanOrEqual(1);
+
+    const main = document.querySelector('main.landing-page');
+    expect(main).toHaveAttribute('data-theme', 'light');
+
+    const playground = document.querySelector('.component-preview');
+    expect(playground).toHaveAttribute('data-theme', 'light');
+
+    // Click dark toggle in landing navbar
+    fireEvent.click(navbarToggles[0]);
+
+    expect(main).toHaveAttribute('data-theme', 'dark');
+    expect(playground).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByText(/dark preview/i)).toBeInTheDocument();
+
+    // Toggle back to light
+    const lightToggles = screen.getAllByRole('button', { name: /light theme preview/i });
+    fireEvent.click(lightToggles[0]);
+
+    expect(main).toHaveAttribute('data-theme', 'light');
+    expect(playground).toHaveAttribute('data-theme', 'light');
+  });
+
+  it('renders theme preview toggle in Docs navbar and updates docs theme', () => {
+    render(
+      <MemoryRouter initialEntries={['/docs']}>
+        <Docs />
+      </MemoryRouter>
+    );
+
+    const darkToggle = screen.getByRole('button', { name: /dark theme preview/i });
+    expect(darkToggle).toBeInTheDocument();
+
+    const main = document.querySelector('main.docs-page');
+    expect(main).toHaveAttribute('data-theme', 'light');
+
+    fireEvent.click(darkToggle);
+    expect(main).toHaveAttribute('data-theme', 'dark');
+
+    const lightToggle = screen.getByRole('button', { name: /light theme preview/i });
+    fireEvent.click(lightToggle);
+    expect(main).toHaveAttribute('data-theme', 'light');
   });
 });

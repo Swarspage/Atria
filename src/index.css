@@ -507,3 +507,279 @@ h2 { font-size: clamp(38px, 5vw, 57px); line-height: 1.05; letter-spacing: -.07e
 .studio-saved{max-width:1440px;margin:18px auto;padding:18px}.studio-saved-head{display:flex;justify-content:space-between;align-items:center}.studio-saved h2{font-size:20px;margin:6px 0 16px}.studio-saved article{display:flex;align-items:center;gap:8px;padding:12px 0;border-top:1px solid #eee}.studio-saved article>div{display:grid;gap:4px;flex:1}.studio-saved article strong{font-size:12px}.studio-saved article small,.studio-saved p{font-size:10px;color:#888}.studio-saved article button{border:1px solid #deddd8;background:white;padding:7px 10px;font-size:10px;cursor:pointer}
 @media(max-width:900px){.studio-workbench{grid-template-columns:290px minmax(0,1fr)}.studio-stage{min-height:460px}}
 @media(max-width:680px){.studio-page{padding:0 14px 36px}.studio-top{height:58px}.studio-top>a{font-size:0}.studio-heading{margin:26px auto 18px;align-items:start;flex-direction:column}.studio-heading h1{font-size:38px}.studio-workbench{grid-template-columns:1fr}.studio-canvas{grid-row:1;min-height:390px}.studio-stage{min-height:320px;padding:20px}.studio-inspector{grid-row:2}.studio-canvas-bottom{font-size:7px}.studio-library-toggle{align-self:flex-start}}
+
+/* Theme preview overrides for landing page and docs */
+.landing-page[data-theme="dark"],
+.docs-page[data-theme="dark"] {
+  background: #121214;
+  color: #f4f3ef;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.landing-page[data-theme="dark"] .nav,
+.docs-page[data-theme="dark"] .nav {
+  border-bottom-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .brand-mark span,
+.docs-page[data-theme="dark"] .brand-mark span {
+  background: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .brand-period,
+.docs-page[data-theme="dark"] .brand-period {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .nav-links,
+.docs-page[data-theme="dark"] .nav-links {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .nav-links a:hover,
+.docs-page[data-theme="dark"] .nav-links a:hover {
+  color: #ffffff;
+}
+
+.landing-page[data-theme="dark"] .nav-cta,
+.docs-page[data-theme="dark"] .nav-cta {
+  border-color: #38383e;
+  color: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .nav-cta:hover,
+.docs-page[data-theme="dark"] .nav-cta:hover {
+  background: #27272a;
+  border-color: #52525b;
+}
+
+.landing-page[data-theme="dark"] .hero-description {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .hero-footnote {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .hero-footnote .mono {
+  color: #d4d4d8;
+}
+
+.landing-page[data-theme="dark"] .button-dark {
+  background: #f4f3ef;
+  color: #121214;
+}
+
+.landing-page[data-theme="dark"] .button-dark:hover {
+  background: #ffffff;
+}
+
+.landing-page[data-theme="dark"] .hero-art {
+  background: #1c1c1f;
+  border-color: #2e2e34;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+}
+
+.landing-page[data-theme="dark"] .art-topline,
+.landing-page[data-theme="dark"] .art-caption {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .art-window {
+  background: #141416;
+  border-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .art-sidebar {
+  border-right-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .side-label,
+.landing-page[data-theme="dark"] .art-date {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .side-item {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .side-item.active {
+  background: #27272a;
+  color: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .side-bottom {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .avatar {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
+.landing-page[data-theme="dark"] .art-stats {
+  border-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .art-stats div {
+  border-right-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .art-stats strong {
+  color: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .art-stats small {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .art-palette {
+  border-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .palette-heading,
+.landing-page[data-theme="dark"] .palette-values,
+.landing-page[data-theme="dark"] .art-bottom {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .ticker {
+  background: #18181b;
+  border-top-color: #27272a;
+  border-bottom-color: #27272a;
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .ticker-track i {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .intro-section {
+  border-top-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .intro-aside p,
+.landing-page[data-theme="dark"] .section-heading > p,
+.landing-page[data-theme="dark"] .component-copy > p {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .foundations-section {
+  background: #18181b;
+  border-top-color: #27272a;
+  border-bottom-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .foundation-card {
+  background: #141416;
+  border-color: #27272a;
+  color: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .foundation-card:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.landing-page[data-theme="dark"] .foundation-card h3 {
+  color: #f4f3ef;
+}
+
+.landing-page[data-theme="dark"] .foundation-card p {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .foundation-icon {
+  color: #d4d4d8;
+}
+
+.landing-page[data-theme="dark"] .card-meta,
+.landing-page[data-theme="dark"] .card-arrow {
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .contact-section {
+  border-top-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .contact-intro {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .contact-links {
+  border-top-color: #27272a;
+}
+
+.landing-page[data-theme="dark"] .contact-link {
+  border-bottom-color: #27272a;
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .contact-link:hover {
+  color: #ffffff;
+  background: #18181b;
+}
+
+.landing-page[data-theme="dark"] .contact-email {
+  color: #ffffff;
+}
+
+.landing-page[data-theme="dark"] .footer-bottom,
+.docs-page[data-theme="dark"] .footer-bottom {
+  border-top-color: #27272a;
+  color: #71717a;
+}
+
+.landing-page[data-theme="dark"] .footer-top p,
+.docs-page[data-theme="dark"] .footer-top p {
+  color: #a1a1aa;
+}
+
+.landing-page[data-theme="dark"] .footer-github,
+.docs-page[data-theme="dark"] .footer-github {
+  color: #f4f3ef;
+}
+
+/* Docs Dark Mode */
+.docs-page[data-theme="dark"] .docs-hero .hero-description {
+  color: #a1a1aa;
+}
+
+.docs-page[data-theme="dark"] .docs-hero-meta {
+  border-top-color: #27272a;
+  color: #71717a;
+}
+
+.docs-page[data-theme="dark"] .docs-content {
+  background: #18181b;
+  border-top-color: #27272a;
+  border-bottom-color: #27272a;
+}
+
+.docs-page[data-theme="dark"] .doc-group {
+  border-top-color: #27272a;
+}
+
+.docs-page[data-theme="dark"] .doc-group-heading p {
+  color: #a1a1aa;
+}
+
+.docs-page[data-theme="dark"] .doc-card {
+  background: #141416;
+  border-color: #27272a;
+  color: #f4f3ef;
+}
+
+.docs-page[data-theme="dark"] .doc-card:hover {
+  border-color: #3f3f46;
+  background: #1c1c1f;
+}
+
+.docs-page[data-theme="dark"] .doc-icon {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
+.docs-page[data-theme="dark"] .doc-card-copy p {
+  color: #a1a1aa;
+}
+
