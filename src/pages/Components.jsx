@@ -16,13 +16,14 @@ const library=[
 {id:'checkbox',name:'Checkbox',category:'Forms',description:'A labelled checkbox for multi-select settings and forms.',variants:['Unchecked','Checked','Disabled'],code:'export function Checkbox({ label, ...props }) {\n  return <label className="checkbox"><input type="checkbox" {...props} /><span>{label}</span></label>;\n}',css:'.checkbox { display:inline-flex; align-items:center; gap:9px; color:#242420; font:14px/1.4 system-ui,sans-serif; cursor:pointer; }\n.checkbox input { width:16px; height:16px; accent-color:#242420; }\n.checkbox input:focus-visible { outline:2px solid #aaa79f; outline-offset:3px; }'}
 ];
 
-const getBtn=(dark)=>({display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid '+(dark?'#38383e':'var(--line)'),background:dark?'#27272a':'#fff',color:dark?'#f4f3ef':'var(--ink)',fontSize:10,cursor:'pointer'});
+const getBtn=(dark)=>({display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',borderWidth:1,borderStyle:'solid',borderColor:dark?'#38383e':'var(--line)',background:dark?'#27272a':'#fff',color:dark?'#f4f3ef':'var(--ink)',fontSize:10,cursor:'pointer'});
 
 function CopyButton({value,label,isDark}){const [copied,setCopied]=useState(false);return <button style={getBtn(isDark)} onClick={async()=>{try{await navigator.clipboard.writeText(value);setCopied(true);setTimeout(()=>setCopied(false),1300)}catch{}}}>{copied?<Check size={13}/>:<Copy size={13}/>} {copied?'Copied':label||'Copy code'}</button>}
 
 export default function Components(){
- const [active,setActive]=useState('button');const [variant,setVariant]=useState('Primary');const [tab,setTab]=useState('React');const [buttonText,setButtonText]=useState('Get started');const [inputValue,setInputValue]=useState('hello@example.com');const [dialogOpen,setDialogOpen]=useState(false);const [selectedTab,setSelectedTab]=useState('Overview');const [selectedOption,setSelectedOption]=useState('Design');const [checked,setChecked]=useState(false);const [selected,setSelected]=useState([]);
- const outlet=useOutletContext();const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext.previewTheme;
+ const [active,setActive]=useState('button');const [variant,setVariant]=useState('Primary');const [tab,setTab]=useState('React');const [buttonText,setButtonText]=useState('Get started');const [inputValue,setInputValue]=useState('hello@example.com');const [dialogOpen,setDialogOpen]=useState(false);const [selectedTab,setSelectedTab]=useState('Overview');const [selectedOption,setSelectedOption]=useState('Design');const [checked,setChecked]=useState(false);const [selected,setSelected]=useState([]);const [query,setQuery]=useState('');const [category,setCategory]=useState('All');
+ let outlet=null;try{outlet=useOutletContext()}catch{outlet=null}
+ const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext?.previewTheme??'light';
  const isDark = previewTheme === 'dark';
  const dialogRef=useRef(null);const dialogTrigger=useRef(null);
  const tabNames=['Overview','Activity','Settings'];
@@ -30,6 +31,8 @@ export default function Components(){
  useEffect(()=>{if(!dialogOpen)return;const trigger=dialogTrigger.current;dialogRef.current?.querySelector('button')?.focus();return()=>trigger?.focus()},[dialogOpen]);
  const onDialogKeyDown=e=>{if(e.key==='Escape'){e.stopPropagation();setDialogOpen(false);return}if(e.key!=='Tab')return;const f=[...dialogRef.current.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled);if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}};
  const onTabKeyDown=(e,i)=>{const move={ArrowRight:(i+1)%tabNames.length,ArrowLeft:(i-1+tabNames.length)%tabNames.length,Home:0,End:tabNames.length-1}[e.key];if(move===undefined)return;e.preventDefault();setSelectedTab(tabNames[move]);document.getElementById('atria-tab-'+tabNames[move])?.focus()};
+ const categories=useMemo(()=>['All',...new Set(library.map(x=>x.category))],[]);
+ const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return library.filter(x=>(category==='All'||x.category===category)&&(!q||x.name.toLowerCase().includes(q)||x.description.toLowerCase().includes(q)))},[query,category]);
  const item=useMemo(()=>library.find(x=>x.id===active)||library[0],[active]);
 
  const previewButton={
@@ -64,15 +67,24 @@ export default function Components(){
     <div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>BROWSE THE LIBRARY</span><p style={{fontSize:11,color:isDark?'#a1a1aa':'#777',margin:'5px 0 0'}}>Select several components to copy their CSS together, or open one to inspect its implementation.</p></div>
     <button onClick={()=>navigator.clipboard.writeText(library.filter(x=>selected.includes(x.id)).map(x=>'/* '+x.name+' */\n'+x.css).join('\n\n'))} disabled={!selected.length} style={{...getBtn(isDark),background:selected.length?(isDark?'#f4f3ef':'#242420'):(isDark?'#27272a':'#f3f2ef'),color:selected.length?(isDark?'#171717':'#fff'):(isDark?'#71717a':'#999'),borderColor:selected.length?(isDark?'#f4f3ef':'#242420'):(isDark?'#38383e':'var(--line)'),opacity:selected.length?1:.65}}> <Copy size={13}/> Copy CSS ({selected.length})</button>
    </div>
+   <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',marginBottom:12}}>
+    <input type="search" aria-label="Search components" placeholder="Search by name or description" value={query} onChange={e=>setQuery(e.target.value)} style={{...getBtn(isDark),flex:'1 1 220px',minWidth:0,padding:'9px 11px',fontSize:11}}/>
+    <select aria-label="Filter by category" value={category} onChange={e=>setCategory(e.target.value)} style={{...getBtn(isDark),flex:'0 1 170px'}}>{categories.map(c=><option key={c} value={c} style={{background:isDark?'#1c1c1f':'#fff',color:isDark?'#f4f3ef':'inherit'}}>{c==='All'?'All categories':c}</option>)}</select>
+    <span aria-live="polite" style={{fontSize:10,color:isDark?'#a1a1aa':'#777'}}>{filtered.length} of {library.length} shown</span>
+   </div>
+   {filtered.length===0&&<div role="status" style={{padding:'28px 14px',border:'1px dashed '+(isDark?'#38383e':'var(--line)'),background:isDark?'#141416':'#fafaf8',textAlign:'center',fontSize:11,color:isDark?'#a1a1aa':'#777'}}>No components match your search. <button onClick={()=>{setQuery('');setCategory('All')}} style={{...getBtn(isDark),marginLeft:8}}>Clear filters</button></div>}
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>
-    {library.map((c,i)=><article key={c.id} style={{minWidth:0,border:'1px solid '+(selected.includes(c.id)?(isDark?'#f4f3ef':'#242420'):(isDark?'#2e2e34':'var(--line)')),background:isDark?'#1c1c1f':'#fff',color:isDark?'#f4f3ef':'inherit',padding:13,transition:'background 0.2s ease, border-color 0.2s ease'}}>
-     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>{c.category.toUpperCase()} / {String(i+1).padStart(2,'0')}</span><input aria-label={'Select '+c.name} type="checkbox" checked={selected.includes(c.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,c.id]:old.filter(id=>id!==c.id))} style={{accentColor:isDark?'#f4f3ef':'#242420',width:15,height:15}}/></div>
-     <div style={{height:82,display:'grid',placeItems:'center',background:isDark?'#141416':'#f3f2ee',border:'1px solid '+(isDark?'#27272a':'var(--line)'),marginBottom:12}}>
-      {c.id==='button'?<span style={{padding:'9px 14px',background:isDark?'#f4f3ef':'#242420',color:isDark?'#171717':'#fff',fontSize:11,borderRadius:5}}>Get started</span>:c.id==='input'?<span style={{padding:9,border:'1px solid '+(isDark?'#38383e':'#ccc'),background:isDark?'#242428':'#fff',fontSize:10,color:isDark?'#a1a1aa':'#888',width:'75%'}}>you@example.com</span>:c.id==='badge'?<span style={{padding:'6px 10px',border:'1px solid '+(isDark?'#166534':'#cbdcc4'),borderRadius:20,background:isDark?'#052e16':'#edf4ea',color:isDark?'#4ade80':'#45633b',fontSize:10}}>● Published</span>:c.id==='card'?<span style={{padding:12,border:'1px solid '+(isDark?'#38383e':'#ddd'),background:isDark?'#242428':'#fff',color:isDark?'#f4f3ef':'inherit',fontSize:11}}>Content card</span>:<span style={{fontSize:23,color:isDark?'#a1a1aa':'#555'}}>Aa</span>}
-     </div>
-     <strong style={{display:'block',fontSize:13,color:isDark?'#f4f3ef':'inherit'}}>{c.name}</strong><p style={{fontSize:10,color:isDark?'#a1a1aa':'#777',lineHeight:1.5,minHeight:30,margin:'5px 0 12px'}}>{c.description}</p>
-     <button onClick={()=>{setActive(c.id);setVariant(c.variants[0]);document.getElementById('component-inspector')?.scrollIntoView({behavior:'smooth',block:'start'})}} style={{...getBtn(isDark),width:'100%',justifyContent:'center'}}>Open component <ArrowUpRight size={12}/></button>
-    </article>)}
+    {filtered.map(c=>{
+      const i=library.indexOf(c);
+      return <article key={c.id} style={{minWidth:0,border:'1px solid '+(selected.includes(c.id)?(isDark?'#f4f3ef':'#242420'):(isDark?'#2e2e34':'var(--line)')),background:isDark?'#1c1c1f':'#fff',color:isDark?'#f4f3ef':'inherit',padding:13,transition:'background 0.2s ease, border-color 0.2s ease'}}>
+       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>{c.category.toUpperCase()} / {String(i+1).padStart(2,'0')}</span><input aria-label={'Select '+c.name} type="checkbox" checked={selected.includes(c.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,c.id]:old.filter(id=>id!==c.id))} style={{accentColor:isDark?'#f4f3ef':'#242420',width:15,height:15}}/></div>
+       <div style={{height:82,display:'grid',placeItems:'center',background:isDark?'#141416':'#f3f2ee',border:'1px solid '+(isDark?'#27272a':'var(--line)'),marginBottom:12}}>
+        {c.id==='button'?<span style={{padding:'9px 14px',background:isDark?'#f4f3ef':'#242420',color:isDark?'#171717':'#fff',fontSize:11,borderRadius:5}}>Get started</span>:c.id==='input'?<span style={{padding:9,border:'1px solid '+(isDark?'#38383e':'#ccc'),background:isDark?'#242428':'#fff',fontSize:10,color:isDark?'#a1a1aa':'#888',width:'75%'}}>you@example.com</span>:c.id==='badge'?<span style={{padding:'6px 10px',border:'1px solid '+(isDark?'#166534':'#cbdcc4'),borderRadius:20,background:isDark?'#052e16':'#edf4ea',color:isDark?'#4ade80':'#45633b',fontSize:10}}>● Published</span>:c.id==='card'?<span style={{padding:12,border:'1px solid '+(isDark?'#38383e':'#ddd'),background:isDark?'#242428':'#fff',color:isDark?'#f4f3ef':'inherit',fontSize:11}}>Content card</span>:<span style={{fontSize:23,color:isDark?'#a1a1aa':'#555'}}>Aa</span>}
+       </div>
+       <strong style={{display:'block',fontSize:13,color:isDark?'#f4f3ef':'inherit'}}>{c.name}</strong><p style={{fontSize:10,color:isDark?'#a1a1aa':'#777',lineHeight:1.5,minHeight:30,margin:'5px 0 12px'}}>{c.description}</p>
+       <button onClick={()=>{setActive(c.id);setVariant(c.variants[0]);document.getElementById('component-inspector')?.scrollIntoView({behavior:'smooth',block:'start'})}} style={{...getBtn(isDark),width:'100%',justifyContent:'center'}}>Open component <ArrowUpRight size={12}/></button>
+      </article>;
+    })}
    </div>
   </section>
   <div id="component-inspector" className="component-inspector-grid">

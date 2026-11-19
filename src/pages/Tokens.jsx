@@ -3,33 +3,42 @@ import { useOutletContext } from 'react-router-dom';
 import {Plus,Copy,Download,Trash,MagnifyingGlass,Check} from '@phosphor-icons/react';
 import {useStudioData} from '../data/studioStore.js';
 import {parseTokenImport,rowsToTokens} from '../data/tokenImport.js';
+import {validateName,validateValue,validateToken} from '../data/tokenValidation.js';
 import { useThemePreview } from '../context/ThemeContext.jsx';
 
-const control={minWidth:0,padding:'9px 10px',border:'1px solid var(--line)',background:'#fff',color:'var(--ink)',font:'inherit',fontSize:11};
+const errorText={display:'block',marginTop:5,fontSize:10,color:'#b54747',lineHeight:1.4};
+const control={minWidth:0,padding:'9px 10px',borderWidth:1,borderStyle:'solid',borderColor:'var(--line)',background:'#fff',color:'var(--ink)',font:'inherit',fontSize:11};
 const action={display:'inline-flex',alignItems:'center',gap:6,padding:'8px 10px',border:'1px solid var(--ink)',background:'#242420',color:'#fff',fontSize:10,cursor:'pointer'};
+
 function CopyValue({value,color}){const [done,setDone]=useState(false);return <button title="Copy" onClick={async()=>{try{await navigator.clipboard.writeText(value);setDone(true);setTimeout(()=>setDone(false),1200)}catch{}}} style={{border:0,background:'transparent',cursor:'pointer',color:color||'inherit'}}>{done?<Check size={14}/>:<Copy size={14}/>}</button>}
+
 export default function Tokens(){
- const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);const [importText,setImportText]=useState('');const [review,setReview]=useState(null);
- const outlet=useOutletContext();const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext.previewTheme;const setPreviewTheme=outlet?.setPreviewTheme??themeContext.setPreviewTheme;
+ const [tokens,save,reset]=useStudioData('tokens');const [query,setQuery]=useState('');const [group,setGroup]=useState('All');const [selected,setSelected]=useState([]);const [activeToken,setActiveToken]=useState(null);const [importText,setImportText]=useState('');const [review,setReview]=useState(null);const [draftErrors,setDraftErrors]=useState({});const [edits,setEdits]=useState({});
  const [draft,setDraft]=useState({name:'',value:'',type:'color',description:'',group:'Primitive'});
+ let outlet=null;try{outlet=useOutletContext()}catch{outlet=null}
+ const themeContext=useThemePreview();const previewTheme=outlet?.previewTheme??themeContext?.previewTheme??'light';
  const isDark = previewTheme === 'dark';
 
  const visible=useMemo(()=>tokens.filter(t=>(group==='All'||t.group===group)&&[t.name,t.value,t.description].join(' ').toLowerCase().includes(query.toLowerCase())),[tokens,group,query]);
  const css=':root {\n'+tokens.map(t=>'  --atria-'+t.name.replaceAll('.','-')+': '+t.value+';').join('\n')+'\n}';
  const json=JSON.stringify(tokens.map(({name,value,type,description,group})=>({name,value,type,description,group})),null,2);
  const download=kind=>{const url=URL.createObjectURL(new Blob([kind==='json'?json:css],{type:kind==='json'?'application/json':'text/css'}));const a=document.createElement('a');a.href=url;a.download='atria-tokens.'+kind;a.click();URL.revokeObjectURL(url)};
- const add=()=>{if(!draft.name.trim()||!draft.value.trim())return;save(items=>[...items,{...draft,id:crypto.randomUUID()}]);setDraft({name:'',value:'',type:'color',description:'',group:'Primitive'})};
+ const add=()=>{const errors=validateToken(draft,tokens);setDraftErrors(errors);if(Object.keys(errors).length)return;save(items=>[...items,{...draft,name:draft.name.trim(),value:draft.value.trim(),id:crypto.randomUUID()}]);setDraft({name:'',value:'',type:'color',description:'',group:'Primitive'})};
  const previewImport=()=>setReview(parseTokenImport(importText,tokens));
  const loadImportFile=async e=>{const file=e.target.files?.[0];if(!file)return;try{const text=await file.text();setImportText(text);setReview(parseTokenImport(text,tokens))}catch{setReview({fileError:'Could not read that file.',rows:[]})}e.target.value=''};
  const applyImport=()=>{const fresh=rowsToTokens(review.rows,()=>crypto.randomUUID());if(!fresh.length)return;save(items=>[...items,...fresh]);setReview(null);setImportText('')};
  const importable=review?review.rows.filter(r=>r.status==='new').length:0;
  const update=(id,field,value)=>save(items=>items.map(t=>t.id===id?{...t,[field]:value}:t));
+ const editFor=(t,field)=>edits[t.id]&&field in edits[t.id]?edits[t.id][field]:t[field];
+ const errorFor=(t,field)=>{const e=edits[t.id];if(!e||!(field in e))return '';return field==='name'?validateName(e.name,tokens,t.id):validateValue(e.value,t.type)};
+ const edit=(t,field,value)=>{const error=field==='name'?validateName(value,tokens,t.id):validateValue(value,t.type);if(error){setEdits(old=>({...old,[t.id]:{...old[t.id],[field]:value}}));return}setEdits(old=>{const {[field]:_,...rest}=old[t.id]||{};const next={...old,[t.id]:rest};if(!Object.keys(rest).length)delete next[t.id];return next});update(t.id,field,value)};
+ const revert=(t,field)=>setEdits(old=>{if(!old[t.id])return old;const {[field]:_,...rest}=old[t.id];const next={...old,[t.id]:rest};if(!Object.keys(rest).length)delete next[t.id];return next});
 
  const cardControlStyle = isDark ? {
    ...control,
    background: '#161618',
    color: '#f4f3ef',
-   border: '1px solid #38383e',
+   borderColor: '#38383e',
  } : control;
 
  return <div className="studio-page">
@@ -44,7 +53,7 @@ export default function Tokens(){
   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',margin:'22px 0 14px'}}>
    <div style={{display:'flex',alignItems:'center',gap:6,border:'1px solid '+(isDark?'#38383e':'var(--line)'),background:isDark?'#1c1c1f':'#fff',padding:'0 9px',flex:1,minWidth:170}}>
     <MagnifyingGlass size={14} color={isDark?'#a1a1aa':undefined}/>
-    <input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...cardControlStyle,border:0,width:'100%'}}/>
+    <input placeholder="Find a token..." value={query} onChange={e=>setQuery(e.target.value)} style={{...cardControlStyle,borderWidth:0,width:'100%'}}/>
    </div>
    {['All','Primitive','Semantic'].map(g=><button key={g} onClick={()=>setGroup(g)} style={{...cardControlStyle,background:group===g?(isDark?'#f4f3ef':'#242420'):(isDark?'#27272a':'#fff'),color:group===g?(isDark?'#121214':'#fff'):(isDark?'#f4f3ef':'var(--ink)'),borderColor:isDark?'#38383e':'var(--line)',cursor:'pointer'}}>{g}</button>)}
   </div>
@@ -65,13 +74,15 @@ export default function Tokens(){
      <span style={{fontSize:8,letterSpacing:'.08em',color:isDark?'#a1a1aa':'#999',textTransform:'uppercase'}}>{t.group} / {t.type}</span>
      <input type="checkbox" aria-label={'Select '+t.name} checked={selected.includes(t.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,t.id]:old.filter(id=>id!==t.id))} style={{accentColor:isDark?'#f4f3ef':'#242420'}}/>
     </div>
-    <input value={t.name} aria-label="Token name" onChange={e=>update(t.id,'name',e.target.value)} style={{...cardControlStyle,width:'100%',fontWeight:600}}/>
+    <input value={editFor(t,'name')} aria-label="Token name" aria-invalid={Boolean(errorFor(t,'name'))} aria-describedby={errorFor(t,'name')?'err-name-'+t.id:undefined} onChange={e=>edit(t,'name',e.target.value)} onBlur={()=>revert(t,'name')} style={{...cardControlStyle,width:'100%',fontWeight:600,borderColor:errorFor(t,'name')?'#b54747':isDark?'#38383e':'var(--line)'}}/>
+    {errorFor(t,'name')&&<small id={'err-name-'+t.id} role="alert" style={{...errorText,color:isDark?'#f87171':'#b54747'}}>{errorFor(t,'name')}</small>}
     <div style={{display:'flex',alignItems:'center',gap:7,marginTop:10}}>
      {t.type==='color'&&<input type="color" aria-label="Token colour" value={/^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#777777'} onChange={e=>update(t.id,'value',e.target.value)} style={{width:34,height:34,padding:2,border:'1px solid '+(isDark?'#3f3f46':'var(--line)'),background:isDark?'#161618':'#fff',borderRadius:3,boxShadow:isDark?'0 0 0 1px rgba(255,255,255,0.2)':'0 0 0 1px rgba(0,0,0,0.12)'}}/>}
-     <input value={t.value} aria-label="Token value" onChange={e=>update(t.id,'value',e.target.value)} style={{...cardControlStyle,flex:1,minWidth:0}}/>
+     <input value={editFor(t,'value')} aria-label="Token value" aria-invalid={Boolean(errorFor(t,'value'))} aria-describedby={errorFor(t,'value')?'err-value-'+t.id:undefined} onChange={e=>edit(t,'value',e.target.value)} onBlur={()=>revert(t,'value')} style={{...cardControlStyle,flex:1,minWidth:0,borderColor:errorFor(t,'value')?'#b54747':isDark?'#38383e':'var(--line)'}}/>
      <CopyValue value={'--atria-'+t.name.replaceAll('.','-')+': '+t.value+';'} color={isDark?'#f4f3ef':undefined}/>
      <button title="Delete token" onClick={()=>{save(items=>items.filter(x=>x.id!==t.id));setSelected(old=>old.filter(id=>id!==t.id))}} style={{border:0,background:'transparent',color:isDark?'#a1a1aa':'inherit',cursor:'pointer'}}><Trash size={14}/></button>
     </div>
+    {errorFor(t,'value')&&<small id={'err-value-'+t.id} role="alert" style={{...errorText,color:isDark?'#f87171':'#b54747'}}>{errorFor(t,'value')}</small>}
     <p style={{fontSize:10,color:isDark?'#a1a1aa':'#888',lineHeight:1.5,minHeight:28,margin:'9px 0 0'}}>{t.description||'No description added.'}</p>
     <button onClick={()=>setActiveToken(t)} style={{...cardControlStyle,width:'100%',marginTop:10,cursor:'pointer'}}>Open token <span style={{float:'right'}}>↗</span></button>
    </article>)}
@@ -79,7 +90,7 @@ export default function Tokens(){
   </div>
   {activeToken&&<div role="presentation" onClick={()=>setActiveToken(null)} style={{position:'fixed',inset:0,zIndex:1100,background:isDark?'#000000b3':'#17171780',display:'grid',placeItems:'center',padding:18}}>
    <section role="dialog" aria-modal="true" aria-labelledby="token-detail-title" onClick={e=>e.stopPropagation()} style={{width:'min(100%,520px)',maxHeight:'85vh',overflow:'auto',background:isDark?'#1c1c1f':'#fff',border:'1px solid '+(isDark?'#2e2e34':'var(--line)'),color:isDark?'#f4f3ef':'inherit',padding:20,borderRadius:8}}>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><div><span className="studio-kicker">{activeToken.group} / {activeToken.type}</span><h3 id="token-detail-title" style={{fontSize:20,margin:'7px 0',color:isDark?'#f4f3ef':'inherit'}}>{activeToken.name}</h3></div><button onClick={()=>setActiveToken(null)} aria-label="Close token details" style={{...control,background:isDark?'#27272a':'#fff',color:isDark?'#f4f3ef':'var(--ink)',border:'1px solid '+(isDark?'#38383e':'var(--line)')}}>Close</button></div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><div style={{textAlign:'left'}}><span className="studio-kicker">{activeToken.group} / {activeToken.type}</span><h3 id="token-detail-title" style={{fontSize:20,margin:'7px 0',color:isDark?'#f4f3ef':'inherit'}}>{activeToken.name}</h3></div><button onClick={()=>setActiveToken(null)} aria-label="Close token details" style={{...control,background:isDark?'#27272a':'#fff',color:isDark?'#f4f3ef':'var(--ink)',border:'1px solid '+(isDark?'#38383e':'var(--line)')}}>Close</button></div>
     <p style={{fontSize:12,color:isDark?'#a1a1aa':'#777'}}>{activeToken.description||'No description added.'}</p>
     {activeToken.type==='color'&&<div style={{display:'flex',alignItems:'center',gap:10,margin:'12px 0'}}><span style={{width:36,height:36,borderRadius:4,background:activeToken.value,boxShadow:isDark?'0 0 0 1px rgba(255,255,255,0.22)':'0 0 0 1px rgba(0,0,0,0.15)'}}/><code style={{fontSize:12,color:isDark?'#f4f3ef':'#242420'}}>{activeToken.value}</code></div>}
     <pre style={{whiteSpace:'pre-wrap',padding:14,background:'#242420',color:'#e9e7e1',fontSize:11,lineHeight:1.7}}>--atria-{activeToken.name.replaceAll('.','-')}: {activeToken.value};</pre>
@@ -89,8 +100,14 @@ export default function Tokens(){
   <section style={{marginTop:20,padding:16,border:'1px solid '+(isDark?'#2e2e34':'var(--line)'),background:isDark?'#18181b':'#fafaf8',color:isDark?'#f4f3ef':'inherit'}}>
    <div className="placeholder-panel-heading"><div><span className="studio-kicker" style={{color:isDark?'#71717a':'#999'}}>ADD TO COLLECTION</span><h3 style={{margin:'4px 0',color:isDark?'#f4f3ef':'inherit'}}>New token</h3></div></div>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(135px,1fr))',gap:8}}>
-    <input aria-label="Token name" placeholder="color.brand.primary" value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})} style={cardControlStyle}/>
-    <input aria-label="Token value" placeholder="#171717 or 16px" value={draft.value} onChange={e=>setDraft({...draft,value:e.target.value})} style={cardControlStyle}/>
+    <div>
+     <input aria-label="New token name" placeholder="color.brand.primary" value={draft.name} aria-invalid={Boolean(draftErrors.name)} aria-describedby={draftErrors.name?'draft-name-error':undefined} onChange={e=>{setDraft({...draft,name:e.target.value});setDraftErrors(old=>({...old,name:''}))}} style={{...cardControlStyle,width:'100%',borderColor:draftErrors.name?'#b54747':undefined}}/>
+     {draftErrors.name&&<small id="draft-name-error" role="alert" style={{...errorText,color:isDark?'#f87171':'#b54747'}}>{draftErrors.name}</small>}
+    </div>
+    <div>
+     <input aria-label="New token value" placeholder="#171717 or 16px" value={draft.value} aria-invalid={Boolean(draftErrors.value)} aria-describedby={draftErrors.value?'draft-value-error':undefined} onChange={e=>{setDraft({...draft,value:e.target.value});setDraftErrors(old=>({...old,value:''}))}} style={{...cardControlStyle,width:'100%',borderColor:draftErrors.value?'#b54747':undefined}}/>
+     {draftErrors.value&&<small id="draft-value-error" role="alert" style={{...errorText,color:isDark?'#f87171':'#b54747'}}>{draftErrors.value}</small>}
+    </div>
     <select aria-label="Token type" value={draft.type} onChange={e=>setDraft({...draft,type:e.target.value})} style={cardControlStyle}><option value="color">Colour</option><option value="dimension">Dimension</option><option value="font">Font</option><option value="number">Number</option><option value="string">String</option></select>
     <select aria-label="Token group" value={draft.group} onChange={e=>setDraft({...draft,group:e.target.value})} style={cardControlStyle}><option>Primitive</option><option>Semantic</option></select>
    </div>
